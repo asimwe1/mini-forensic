@@ -10,7 +10,7 @@ def analyze_with_scapy(pcap_file):
     return scapy_results
 
 def analyze_with_tshark(pcap_file):
-    tshark_command = f"tshark -r {pcap_file} -T json"
+    tshark_command = f"tshark -r {pcap_file} -T json -e ip.src -e ip.dst -e tcp.port -e http.request.method"
     process = subprocess.Popen(tshark_command.split(), stdout=subprocess.PIPE)
     output, _ = process.communicate()
     tshark_results = json.loads(output)
@@ -33,6 +33,6 @@ def analyze_and_compare(pcap_file):
     return comparison
 
 if __name__ == "__main__":
-    pcap_file = "path_to_your_pcap_file.pcap"
+    pcap_file = "upload.pcap"
     results = analyze_and_compare(pcap_file)
     print(json.dumps(results, indent=4))

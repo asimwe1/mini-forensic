@@ -1,4 +1,6 @@
 import os
+import boto3
+import magic
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,8 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 # Configuration
-UPLOAD_FOLDER = '/path/to/the/uploads'
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+UPLOAD_FOLDER = '../../../uploads'
+ALLOWED_MIME_TYPES = {'text/plain', 'application/pdf', 'image/jpeg', 'image/png', 'image/gif'}
 
 # CORS middleware
 app.add_middleware(
@@ -19,7 +21,8 @@ app.add_middleware(
 )
 
 def allowed_file(filename: str) -> bool:
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    mime_type = magic.from_buffer(file_content[:2048], mime=True)
+    return mime_type in ALLOWED_MIME_TYPES
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):

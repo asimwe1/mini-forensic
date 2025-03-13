@@ -5,3 +5,4 @@ python-dotenv
 reportlab
 scapy
 volatility3
+celery
