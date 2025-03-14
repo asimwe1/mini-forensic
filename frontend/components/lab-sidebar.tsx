@@ -25,7 +25,7 @@ import {
   Settings,
   Shield,
   Upload,
-  Languages,
+Languages,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"

@@ -80,26 +80,80 @@ export default function LandingPage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 flex flex-col">
       {/* Navigation */}
       <header className="border-b border-muted/50 backdrop-blur-sm bg-background/80 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Shield className="h-6 w-6 text-primary animate-pulse" />
-            <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-              Forensics Lab
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/signin"
-              className="text-sm hover:text-primary transition-colors"
-            >
-              Sign In
-            </Link>
-            <Button
-              asChild
-              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-            >
-              <Link href="/signup">Sign Up</Link>
-            </Button>
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-8">
+              <Link href="/" className="flex items-center gap-2">
+                <Shield className="h-6 w-6 text-primary animate-pulse" />
+                <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                  Forensics Lab
+                </span>
+              </Link>
+              <nav className="hidden md:flex items-center gap-6">
+                <Link
+                  href="/features"
+                  className="text-sm hover:text-primary transition-colors"
+                >
+                  Features
+                </Link>
+                <Link
+                  href="/pricing"
+                  className="text-sm hover:text-primary transition-colors"
+                >
+                  Pricing
+                </Link>
+                <Link
+                  href="/docs"
+                  className="text-sm hover:text-primary transition-colors"
+                >
+                  Documentation
+                </Link>
+                <Link
+                  href="/about"
+                  className="text-sm hover:text-primary transition-colors"
+                >
+                  About
+                </Link>
+                <Link
+                  href="/contact"
+                  className="text-sm hover:text-primary transition-colors"
+                >
+                  Contact
+                </Link>
+              </nav>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Already have an account?</span>
+                <Link href="/signin" className="text-primary hover:underline">
+                  Sign In
+                </Link>
+              </div>
+              <Button
+                asChild
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+              >
+                <Link href="/signup">Get Started Free</Link>
+              </Button>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5"
+                >
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+              </Button>
+            </div>
           </div>
         </div>
       </header>

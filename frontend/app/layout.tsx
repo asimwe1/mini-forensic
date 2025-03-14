@@ -29,13 +29,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <LanguageProvider>
-            <SidebarProvider>
-              <div className="flex h-screen">
-                <LabSidebar />
-                <main className="flex-1 overflow-auto">{children}</main>
-              </div>
-              <Toaster />
-            </SidebarProvider>
+            <div className="flex h-screen">
+              <main className="flex-1 overflow-auto">{children}</main>
+            </div>
+            <Toaster />
           </LanguageProvider>
         </ThemeProvider>
       </body>

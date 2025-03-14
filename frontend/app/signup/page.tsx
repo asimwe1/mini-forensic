@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,7 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -47,31 +47,31 @@ export default function SignUpPage() {
     {
       id: "length",
       label: "At least 8 characters",
-      test: (pass) => pass.length >= 8,
+      test: (pass: string) => pass.length >= 8,
     },
     {
       id: "uppercase",
       label: "Contains uppercase letter",
-      test: (pass) => /[A-Z]/.test(pass),
+      test: (pass: string) => /[A-Z]/.test(pass),
     },
     {
       id: "lowercase",
       label: "Contains lowercase letter",
-      test: (pass) => /[a-z]/.test(pass),
+      test: (pass: string) => /[a-z]/.test(pass),
     },
     {
       id: "number",
       label: "Contains number",
-      test: (pass) => /[0-9]/.test(pass),
+      test: (pass: string) => /[0-9]/.test(pass),
     },
     {
       id: "special",
       label: "Contains special character",
-      test: (pass) => /[^A-Za-z0-9]/.test(pass),
+      test: (pass: string) => /[^A-Za-z0-9]/.test(pass),
     },
   ];
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Validate form
