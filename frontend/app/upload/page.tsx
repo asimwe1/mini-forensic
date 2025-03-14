@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FileUp, X, Check, File, HardDrive, Wifi } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LabSidebar } from "@/components/lab-sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 interface FileWithStatus {
   file: File;
@@ -134,111 +135,112 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <LabSidebar />
+    <SidebarProvider>
+      <div className="flex h-screen">
+        <LabSidebar />
+        <div className="flex-1 overflow-auto">
+          <div className="container mx-auto p-4 space-y-6">
+            <h1 className="text-3xl font-bold tracking-tight">
+              {t("uploadFiles")}
+            </h1>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto p-4 space-y-6">
-          <h1 className="text-3xl font-bold tracking-tight">
-            {t("uploadFiles")}
-          </h1>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("uploadFiles")}</CardTitle>
-              <CardDescription>
-                Upload disk images, memory dumps, network captures, or log files
-                for analysis
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div
-                {...getRootProps()}
-                className={`border-2 border-dashed rounded-lg p-10 text-center cursor-pointer transition-colors ${
-                  isDragActive ? "border-primary bg-primary/10" : "border-muted"
-                }`}
-              >
-                <input {...getInputProps()} />
-                <FileUp className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">{t("dragAndDrop")}</p>
-              </div>
-
-              <AnimatePresence>
-                {files.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-2"
-                  >
-                    {files.map((file) => (
-                      <motion.div
-                        key={file.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="flex items-center p-2 border rounded-md"
-                      >
-                        {getFileIcon(file.file.name)}
-                        <div className="ml-2 flex-1">
-                          <div className="flex justify-between">
-                            <p className="text-sm font-medium">
-                              {file.file.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {(file.file.size / (1024 * 1024)).toFixed(2)} MB
-                            </p>
-                          </div>
-                          <Progress
-                            value={file.progress}
-                            className="h-1 mt-1"
-                          />
-                        </div>
-                        {file.status === "complete" ? (
-                          <Check className="h-5 w-5 ml-2 text-accent" />
-                        ) : (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeFile(file.id)}
-                            disabled={uploading}
-                          >
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">Remove</span>
-                          </Button>
-                        )}
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {files.length > 0 && (
-                <Button
-                  onClick={uploadFiles}
-                  disabled={uploading}
-                  className="w-full"
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("uploadFiles")}</CardTitle>
+                <CardDescription>
+                  Upload disk images, memory dumps, network captures, or log
+                  files for analysis
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div
+                  {...getRootProps()}
+                  className={`border-2 border-dashed rounded-lg p-10 text-center cursor-pointer transition-colors ${
+                    isDragActive
+                      ? "border-primary bg-primary/10"
+                      : "border-muted"
+                  }`}
                 >
-                  {uploading ? (
-                    <>
-                      <span className="mr-2">Uploading...</span>
-                      <span>{progress}%</span>
-                    </>
-                  ) : (
-                    <>
-                      <FileUp className="mr-2 h-4 w-4" />
-                      Upload {files.length}{" "}
-                      {files.length === 1 ? "file" : "files"}
-                    </>
+                  <input {...getInputProps()} />
+                  <FileUp className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground">{t("dragAndDrop")}</p>
+                </div>
+
+                <AnimatePresence>
+                  {files.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-2"
+                    >
+                      {files.map((file) => (
+                        <motion.div
+                          key={file.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="flex items-center p-2 border rounded-md"
+                        >
+                          {getFileIcon(file.file.name)}
+                          <div className="ml-2 flex-1">
+                            <div className="flex justify-between">
+                              <p className="text-sm font-medium">
+                                {file.file.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {(file.file.size / (1024 * 1024)).toFixed(2)} MB
+                              </p>
+                            </div>
+                            <Progress
+                              value={file.progress}
+                              className="h-1 mt-1"
+                            />
+                          </div>
+                          {file.status === "complete" ? (
+                            <Check className="h-5 w-5 ml-2 text-accent" />
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeFile(file.id)}
+                              disabled={uploading}
+                            >
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove</span>
+                            </Button>
+                          )}
+                        </motion.div>
+                      ))}
+                    </motion.div>
                   )}
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+                </AnimatePresence>
+
+                {files.length > 0 && (
+                  <Button
+                    onClick={uploadFiles}
+                    disabled={uploading}
+                    className="w-full"
+                  >
+                    {uploading ? (
+                      <>
+                        <span className="mr-2">Uploading...</span>
+                        <span>{progress}%</span>
+                      </>
+                    ) : (
+                      <>
+                        <FileUp className="mr-2 h-4 w-4" />
+                        Upload {files.length}{" "}
+                        {files.length === 1 ? "file" : "files"}
+                      </>
+                    )}
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
