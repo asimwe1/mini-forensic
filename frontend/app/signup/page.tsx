@@ -1,14 +1,22 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Shield, UserPlus, Eye, EyeOff, Check, X } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import React from "react";
+import { useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import { Shield, UserPlus, Eye, EyeOff, Check, X } from "lucide-react";
+import { useToast } from "../../hooks/use-toast";
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -16,35 +24,60 @@ export default function SignUpPage() {
     email: "",
     password: "",
     confirmPassword: "",
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const passwordRequirements = [
-    { id: "length", label: "At least 8 characters", test: (pass) => pass.length >= 8 },
-    { id: "uppercase", label: "Contains uppercase letter", test: (pass) => /[A-Z]/.test(pass) },
-    { id: "lowercase", label: "Contains lowercase letter", test: (pass) => /[a-z]/.test(pass) },
-    { id: "number", label: "Contains number", test: (pass) => /[0-9]/.test(pass) },
-    { id: "special", label: "Contains special character", test: (pass) => /[^A-Za-z0-9]/.test(pass) },
-  ]
+    {
+      id: "length",
+      label: "At least 8 characters",
+      test: (pass) => pass.length >= 8,
+    },
+    {
+      id: "uppercase",
+      label: "Contains uppercase letter",
+      test: (pass) => /[A-Z]/.test(pass),
+    },
+    {
+      id: "lowercase",
+      label: "Contains lowercase letter",
+      test: (pass) => /[a-z]/.test(pass),
+    },
+    {
+      id: "number",
+      label: "Contains number",
+      test: (pass) => /[0-9]/.test(pass),
+    },
+    {
+      id: "special",
+      label: "Contains special character",
+      test: (pass) => /[^A-Za-z0-9]/.test(pass),
+    },
+  ];
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Validate form
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.password ||
+      !formData.confirmPassword
+    ) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (formData.password !== formData.confirmPassword) {
@@ -52,33 +85,35 @@ export default function SignUpPage() {
         title: "Error",
         description: "Passwords do not match",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     // Check password requirements
-    const failedRequirements = passwordRequirements.filter((req) => !req.test(formData.password))
+    const failedRequirements = passwordRequirements.filter(
+      (req) => !req.test(formData.password)
+    );
     if (failedRequirements.length > 0) {
       toast({
         title: "Password requirements not met",
         description: "Please ensure your password meets all requirements",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     // Simulate account creation
     setTimeout(() => {
-      setIsLoading(false)
+      setIsLoading(false);
       toast({
         title: "Account created",
         description: "Your account has been created successfully",
-      })
+      });
       // In a real app, you would redirect to the dashboard or sign-in page here
-    }, 1500)
-  }
+    }, 1500);
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
@@ -99,8 +134,12 @@ export default function SignUpPage() {
       >
         <Card className="border-muted">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Create an Account</CardTitle>
-            <CardDescription className="text-center">Enter your information to create an account</CardDescription>
+            <CardTitle className="text-2xl font-bold text-center">
+              Create an Account
+            </CardTitle>
+            <CardDescription className="text-center">
+              Enter your information to create an account
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -151,7 +190,9 @@ export default function SignUpPage() {
                     ) : (
                       <Eye className="h-4 w-4 text-muted-foreground" />
                     )}
-                    <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
+                    <span className="sr-only">
+                      {showPassword ? "Hide password" : "Show password"}
+                    </span>
                   </Button>
                 </div>
 
@@ -164,7 +205,13 @@ export default function SignUpPage() {
                         ) : (
                           <X className="h-3 w-3 mr-2 text-destructive" />
                         )}
-                        <span className={req.test(formData.password) ? "text-muted-foreground" : "text-destructive"}>
+                        <span
+                          className={
+                            req.test(formData.password)
+                              ? "text-muted-foreground"
+                              : "text-destructive"
+                          }
+                        >
                           {req.label}
                         </span>
                       </div>
@@ -183,9 +230,13 @@ export default function SignUpPage() {
                   onChange={handleChange}
                   required
                 />
-                {formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                  <p className="text-xs text-destructive mt-1">Passwords do not match</p>
-                )}
+                {formData.password &&
+                  formData.confirmPassword &&
+                  formData.password !== formData.confirmPassword && (
+                    <p className="text-xs text-destructive mt-1">
+                      Passwords do not match
+                    </p>
+                  )}
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
@@ -236,6 +287,5 @@ export default function SignUpPage() {
         &copy; {new Date().getFullYear()} Forensics Lab. All rights reserved.
       </p>
     </div>
-  )
+  );
 }
-

@@ -1,7 +1,8 @@
-"use client"
+"use client";
 
-import { Canvas } from "@react-three/fiber"
-import { OrbitControls } from "@react-three/drei"
+import React from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
 
 // Simple placeholder component that doesn't use complex hooks or state
 function SimpleMemoryVisualizer() {
@@ -17,7 +18,7 @@ function SimpleMemoryVisualizer() {
         <OrbitControls />
       </Canvas>
     </div>
-  )
+  );
 }
 
 export function MemoryVisualizer() {
@@ -25,10 +26,13 @@ export function MemoryVisualizer() {
   return (
     <div className="w-full h-full flex items-center justify-center">
       <div className="text-center p-4">
-        <h3 className="text-lg font-medium text-secondary mb-2">Memory Analysis</h3>
-        <p className="text-sm text-muted-foreground">3D memory block visualization would display here.</p>
+        <h3 className="text-lg font-medium text-secondary mb-2">
+          Memory Analysis
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          3D memory block visualization would display here.
+        </p>
       </div>
     </div>
-  )
+  );
 }
-

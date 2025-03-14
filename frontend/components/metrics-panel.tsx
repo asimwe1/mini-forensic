@@ -1,18 +1,24 @@
-"use client"
+"use client";
 
-import { useLanguage } from "@/components/language-provider"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Activity } from "lucide-react"
+import React from "react";
+import { useLanguage } from "../components/language-provider";
 import {
-  Chart,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartArea,
-  ChartLine,
-  ChartXAxis,
-  ChartYAxis,
-} from "@/components/ui/chart"
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Activity } from "lucide-react";
+import {
+  ResponsiveContainer as Chart,
+  Area as ChartArea,
+  Line as ChartLine,
+  XAxis as ChartXAxis,
+  YAxis as ChartYAxis,
+  Tooltip as ChartTooltip,
+  TooltipProps as ChartTooltipProps,
+  ComposedChart,
+} from "recharts";
 
 const data = [
   { time: "00:00", value: 10 },
@@ -22,10 +28,10 @@ const data = [
   { time: "16:00", value: 45 },
   { time: "20:00", value: 30 },
   { time: "24:00", value: 20 },
-]
+];
 
 export function MetricsPanel() {
-  const { t } = useLanguage()
+  const { t } = useLanguage();
 
   return (
     <Card>
@@ -37,14 +43,16 @@ export function MetricsPanel() {
       </CardHeader>
       <CardContent>
         <div className="h-[150px]">
-          <Chart data={data}>
-            <ChartContainer>
-              <ChartTooltip>
-                <ChartTooltipContent />
-              </ChartTooltip>
+          <Chart width="100%" height="100%">
+            <ComposedChart data={data}>
+              <ChartTooltip />
               <ChartYAxis />
               <ChartXAxis dataKey="time" />
-              <ChartArea dataKey="value" fill="url(#colorGradient)" opacity={0.2} />
+              <ChartArea
+                dataKey="value"
+                fill="url(#colorGradient)"
+                opacity={0.2}
+              />
               <ChartLine
                 dataKey="value"
                 stroke="hsl(var(--primary))"
@@ -53,11 +61,19 @@ export function MetricsPanel() {
               />
               <defs>
                 <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  <stop
+                    offset="5%"
+                    stopColor="hsl(var(--primary))"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="hsl(var(--primary))"
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
-            </ChartContainer>
+            </ComposedChart>
           </Chart>
         </div>
         <div className="grid grid-cols-3 gap-2 mt-4">
@@ -76,6 +92,5 @@ export function MetricsPanel() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
-

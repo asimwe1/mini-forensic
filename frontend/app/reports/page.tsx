@@ -1,39 +1,56 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useLanguage } from "@/components/language-provider"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { FileText, Download, Eye, FileCheck } from "lucide-react"
-import { motion } from "framer-motion"
+import React from "react";
+import { useState } from "react";
+import { useLanguage } from "../../components/language-provider";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../components/ui/tabs";
+import { Checkbox } from "../../components/ui/checkbox";
+import { Label } from "../../components/ui/label";
+import { FileText, Download, Eye, FileCheck } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function ReportsPage() {
-  const { t } = useLanguage()
-  const [generating, setGenerating] = useState(false)
-  const [reportGenerated, setReportGenerated] = useState(false)
+  const { t } = useLanguage();
+  const [generating, setGenerating] = useState(false);
+  const [reportGenerated, setReportGenerated] = useState(false);
 
   const handleGenerateReport = () => {
-    setGenerating(true)
+    setGenerating(true);
 
     // Simulate report generation
     setTimeout(() => {
-      setGenerating(false)
-      setReportGenerated(true)
-    }, 3000)
-  }
+      setGenerating(false);
+      setReportGenerated(true);
+    }, 3000);
+  };
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">{t("generateReport")}</h1>
+      <h1 className="text-3xl font-bold tracking-tight">
+        {t("generateReport")}
+      </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>{t("generateReport")}</CardTitle>
-            <CardDescription>Create a comprehensive forensic analysis report</CardDescription>
+            <CardDescription>
+              Create a comprehensive forensic analysis report
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="sections">
@@ -58,7 +75,9 @@ export default function ReportsPage() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="section-filesystem" defaultChecked />
-                    <Label htmlFor="section-filesystem">File System Analysis</Label>
+                    <Label htmlFor="section-filesystem">
+                      File System Analysis
+                    </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="section-timeline" defaultChecked />
@@ -66,11 +85,15 @@ export default function ReportsPage() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="section-ioc" defaultChecked />
-                    <Label htmlFor="section-ioc">Indicators of Compromise</Label>
+                    <Label htmlFor="section-ioc">
+                      Indicators of Compromise
+                    </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="section-recommendations" defaultChecked />
-                    <Label htmlFor="section-recommendations">Recommendations</Label>
+                    <Label htmlFor="section-recommendations">
+                      Recommendations
+                    </Label>
                   </div>
                 </div>
               </TabsContent>
@@ -98,7 +121,11 @@ export default function ReportsPage() {
             </Tabs>
           </CardContent>
           <CardFooter>
-            <Button onClick={handleGenerateReport} disabled={generating} className="w-full">
+            <Button
+              onClick={handleGenerateReport}
+              disabled={generating}
+              className="w-full"
+            >
               {generating ? (
                 <span className="flex items-center">
                   <svg
@@ -136,12 +163,16 @@ export default function ReportsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Report Preview</CardTitle>
-            <CardDescription>3D visualization of your forensic report</CardDescription>
+            <CardDescription>
+              3D visualization of your forensic report
+            </CardDescription>
           </CardHeader>
           <CardContent className="h-[400px] relative">
             {reportGenerated ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 rounded-md">
-                <div className="text-primary text-2xl font-bold mb-4 glow">REPORT READY</div>
+                <div className="text-primary text-2xl font-bold mb-4 glow">
+                  REPORT READY
+                </div>
 
                 <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
                   <Button>
@@ -158,7 +189,9 @@ export default function ReportsPage() {
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
                   <FileCheck className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">Generate a report to see a preview</p>
+                  <p className="text-muted-foreground">
+                    Generate a report to see a preview
+                  </p>
                 </div>
               </div>
             )}
@@ -167,11 +200,19 @@ export default function ReportsPage() {
       </div>
 
       {reportGenerated && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <Card className="border-accent glow-accent">
             <CardHeader>
-              <CardTitle className="text-accent">Report Generated Successfully</CardTitle>
-              <CardDescription>Your forensic analysis report is ready for download</CardDescription>
+              <CardTitle className="text-accent">
+                Report Generated Successfully
+              </CardTitle>
+              <CardDescription>
+                Your forensic analysis report is ready for download
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
@@ -209,6 +250,5 @@ export default function ReportsPage() {
         </motion.div>
       )}
     </div>
-  )
+  );
 }
-

@@ -1,17 +1,18 @@
-"use client"
+"use client";
 
-import { useLanguage } from "@/components/language-provider"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Bell, ShieldAlert, ShieldCheck } from "lucide-react"
-import { motion } from "framer-motion"
+import React from "react";
+import { useLanguage } from "../components/language-provider";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Bell, ShieldAlert, ShieldCheck } from "lucide-react";
+import { motion } from "framer-motion";
 
 type Alert = {
-  id: number
-  level: "high" | "medium" | "low"
-  message: string
-  timestamp: string
-}
+  id: number;
+  level: "high" | "medium" | "low";
+  message: string;
+  timestamp: string;
+};
 
 const alerts: Alert[] = [
   {
@@ -32,10 +33,10 @@ const alerts: Alert[] = [
     message: "Multiple failed login attempts",
     timestamp: "1 hour ago",
   },
-]
+];
 
 export function AlertPanel() {
-  const { t } = useLanguage()
+  const { t } = useLanguage();
 
   return (
     <Card>
@@ -68,16 +69,20 @@ export function AlertPanel() {
                 )}
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium leading-none">{alert.message}</p>
-                <p className="text-xs text-muted-foreground">{alert.timestamp}</p>
+                <p className="text-sm font-medium leading-none">
+                  {alert.message}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {alert.timestamp}
+                </p>
               </div>
               <Badge
                 className={
                   alert.level === "high"
                     ? "bg-destructive/20 text-destructive ml-auto"
                     : alert.level === "medium"
-                      ? "bg-orange-400/20 text-orange-400 ml-auto"
-                      : "bg-accent/20 text-accent ml-auto"
+                    ? "bg-orange-400/20 text-orange-400 ml-auto"
+                    : "bg-accent/20 text-accent ml-auto"
                 }
               >
                 {t(alert.level)}
@@ -87,6 +92,5 @@ export function AlertPanel() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
-
