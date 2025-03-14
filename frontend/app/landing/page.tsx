@@ -133,13 +133,13 @@ export default function LandingPage() {
                   Contact
                 </button>
               </nav>
-            </div>
-            <div className="flex items-center gap-4">
+          </div>
+          <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
                 <span>Already have an account?</span>
                 <Link href="/signin" className="text-primary hover:underline">
-                  Sign In
-                </Link>
+              Sign In
+            </Link>
               </div>
               <Button
                 asChild
@@ -158,7 +158,7 @@ export default function LandingPage() {
                 ) : (
                   <Menu className="h-5 w-5" />
                 )}
-              </Button>
+            </Button>
             </div>
           </div>
         </div>
