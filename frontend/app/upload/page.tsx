@@ -1,51 +1,44 @@
-"use client";
+"use client"
 
-import { useState, useCallback } from "react";
-import { useLanguage } from "../../components/language-provider";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Progress } from "../../components/ui/progress";
-import { useToast } from "../../hooks/use-toast";
-import { FileUp, X, Check, File, HardDrive, Wifi } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useCallback } from "react"
+import { useLanguage } from "@/components/language-provider"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
+import { useToast } from "@/hooks/use-toast"
+import { FileUp, X, Check, File, HardDrive, Wifi } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 // Mock implementation of useDropzone since we don't have the actual package
 function useDropzone({ onDrop }) {
   const getRootProps = () => ({
     onClick: () => {
       // This would normally trigger the file dialog
-      const input = document.createElement("input");
-      input.type = "file";
-      input.multiple = true;
+      const input = document.createElement("input")
+      input.type = "file"
+      input.multiple = true
       input.onchange = (e) => {
-        const target = e.target as HTMLInputElement;
-        if (target?.files) {
-          onDrop(Array.from(target.files));
+        if (e.target.files) {
+          onDrop(Array.from(e.target.files))
         }
-      };
-      input.click();
+      }
+      input.click()
     },
-  });
+  })
 
-  const getInputProps = () => ({});
+  const getInputProps = () => ({})
 
-  const isDragActive = false;
+  const isDragActive = false
 
-  return { getRootProps, getInputProps, isDragActive };
+  return { getRootProps, getInputProps, isDragActive }
 }
 
 export default function UploadPage() {
-  const { t } = useLanguage();
-  const { toast } = useToast();
-  const [files, setFiles] = useState([]);
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const { t } = useLanguage()
+  const { toast } = useToast()
+  const [files, setFiles] = useState([])
+  const [uploading, setUploading] = useState(false)
+  const [progress, setProgress] = useState(0)
 
   const onDrop = useCallback((acceptedFiles) => {
     setFiles((prev) => [
@@ -56,26 +49,26 @@ export default function UploadPage() {
         progress: 0,
         status: "idle",
       })),
-    ]);
-  }, []);
+    ])
+  }, [])
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
 
   const removeFile = (id) => {
-    setFiles(files.filter((file) => file.id !== id));
-  };
+    setFiles(files.filter((file) => file.id !== id))
+  }
 
   const uploadFiles = async () => {
-    if (files.length === 0) return;
+    if (files.length === 0) return
 
-    setUploading(true);
+    setUploading(true)
 
     // Simulate upload progress
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
-          clearInterval(interval);
-          setUploading(false);
+          clearInterval(interval)
+          setUploading(false)
 
           // Update file statuses
           setFiles(
@@ -83,18 +76,18 @@ export default function UploadPage() {
               ...file,
               progress: 100,
               status: "complete",
-            }))
-          );
+            })),
+          )
 
           toast({
             title: "Upload complete",
             description: `Successfully uploaded ${files.length} files`,
-          });
+          })
 
-          return 0;
+          return 0
         }
-        return prev + 5;
-      });
+        return prev + 5
+      })
 
       // Update individual file progress
       setFiles((prev) =>
@@ -102,24 +95,19 @@ export default function UploadPage() {
           ...file,
           progress: Math.min(file.progress + Math.random() * 10, 100),
           status: file.progress >= 100 ? "complete" : "uploading",
-        }))
-      );
-    }, 300);
+        })),
+      )
+    }, 300)
 
-    return () => clearInterval(interval);
-  };
+    return () => clearInterval(interval)
+  }
 
   const getFileIcon = (fileName) => {
-    if (fileName.endsWith(".pcap") || fileName.endsWith(".pcapng"))
-      return <Wifi className="h-6 w-6 text-primary" />;
-    if (
-      fileName.endsWith(".img") ||
-      fileName.endsWith(".dd") ||
-      fileName.endsWith(".raw")
-    )
-      return <HardDrive className="h-6 w-6 text-secondary" />;
-    return <File className="h-6 w-6 text-accent" />;
-  };
+    if (fileName.endsWith(".pcap") || fileName.endsWith(".pcapng")) return <Wifi className="h-6 w-6 text-primary" />
+    if (fileName.endsWith(".img") || fileName.endsWith(".dd") || fileName.endsWith(".raw"))
+      return <HardDrive className="h-6 w-6 text-secondary" />
+    return <File className="h-6 w-6 text-accent" />
+  }
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -129,8 +117,7 @@ export default function UploadPage() {
         <CardHeader>
           <CardTitle>{t("uploadFiles")}</CardTitle>
           <CardDescription>
-            Upload disk images, memory dumps, network captures, or log files for
-            analysis
+            Upload disk images, memory dumps, network captures, or log files for analysis
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -174,12 +161,7 @@ export default function UploadPage() {
                     {file.status === "complete" ? (
                       <Check className="h-5 w-5 ml-2 text-accent" />
                     ) : (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeFile(file.id)}
-                        disabled={uploading}
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => removeFile(file.id)} disabled={uploading}>
                         <X className="h-4 w-4" />
                         <span className="sr-only">Remove</span>
                       </Button>
@@ -191,11 +173,7 @@ export default function UploadPage() {
           </AnimatePresence>
 
           {files.length > 0 && (
-            <Button
-              onClick={uploadFiles}
-              disabled={uploading}
-              className="w-full"
-            >
+            <Button onClick={uploadFiles} disabled={uploading} className="w-full">
               {uploading ? (
                 <>
                   <span className="mr-2">Uploading...</span>
@@ -212,5 +190,6 @@ export default function UploadPage() {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }
+
