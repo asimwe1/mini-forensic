@@ -115,12 +115,6 @@ export default function LandingPage() {
                   Features
                 </button>
                 <button
-                  onClick={() => scrollToSection("pricing")}
-                  className="text-sm hover:text-primary transition-colors"
-                >
-                  Pricing
-                </button>
-                <button
                   onClick={() => scrollToSection("docs")}
                   className="text-sm hover:text-primary transition-colors"
                 >
@@ -687,8 +681,10 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <Shield className="h-5 w-5 text-primary" />
-              <span className="font-medium">Forensics Lab</span>
+              <Shield className="h-5 w-5 text-primary animate-pulse" />
+              <span className="font-medium bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                Forensics Lab
+              </span>
             </div>
             <div className="flex gap-6">
               <Link

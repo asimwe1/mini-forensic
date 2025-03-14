@@ -15,42 +15,68 @@ import {
   Globe,
   Shield,
 } from "lucide-react";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 export default function DashboardPage() {
   const { t } = useLanguage();
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar */}
-      <LabSidebar />
+    <SidebarProvider>
+      <div className="flex h-screen bg-background">
+        {/* Sidebar */}
+        <LabSidebar />
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto p-6">
-          {/* Header */}
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto p-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight">
-              {t("dashboard")}
-            </h1>
-            <p className="text-muted-foreground">
-              Welcome back! Here's an overview of your forensic analysis.
-            </p>
+            <h1 className="text-3xl font-bold">{t("dashboard.title")}</h1>
+            <p className="text-muted-foreground">{t("dashboard.welcome")}</p>
           </div>
 
           {/* Grid Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {/* Quick Stats */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  <Globe className="w-4 h-4 inline mr-2" />
-                  Network Activity
+                  {t("dashboard.stats.network.title")}
                 </CardTitle>
+                <Globe className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">2.4 GB/s</div>
+                <p className="text-xs text-muted-foreground">
+                  {t("dashboard.stats.network.description")}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t("dashboard.stats.memory.title")}
+                </CardTitle>
+                <Database className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">64%</div>
+                <p className="text-xs text-muted-foreground">
+                  {t("dashboard.stats.memory.description")}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t("dashboard.stats.files.title")}
+                </CardTitle>
+                <FileDigit className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">1,234</div>
                 <p className="text-xs text-muted-foreground">
-                  Active connections
+                  {t("dashboard.stats.files.description")}
                 </p>
               </CardContent>
             </Card>
@@ -58,110 +84,54 @@ export default function DashboardPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  <Database className="w-4 h-4 inline mr-2" />
-                  Memory Usage
+                  {t("dashboard.stats.threats.title")}
                 </CardTitle>
+                <Shield className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">4.2 GB</div>
+                <div className="text-2xl font-bold">3</div>
                 <p className="text-xs text-muted-foreground">
-                  Current memory footprint
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  <FileDigit className="w-4 h-4 inline mr-2" />
-                  Files Analyzed
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">8,567</div>
-                <p className="text-xs text-muted-foreground">
-                  Total files processed
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  <Shield className="w-4 h-4 inline mr-2" />
-                  Threat Level
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-destructive">High</div>
-                <p className="text-xs text-muted-foreground">
-                  3 critical threats detected
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  <ActivitySquare className="w-4 h-4 inline mr-2" />
-                  System Status
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-500">Active</div>
-                <p className="text-xs text-muted-foreground">
-                  All systems operational
+                  {t("dashboard.stats.threats.description")}
                 </p>
               </CardContent>
             </Card>
           </div>
 
           {/* Main Visualization Section */}
-          <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Network Graph */}
-            <Card className="col-span-1">
+          <div className="mt-8 grid gap-8 md:grid-cols-2">
+            <Card className="col-span-2">
               <CardHeader>
-                <CardTitle>Network Visualization</CardTitle>
+                <CardTitle>{t("dashboard.visualization.title")}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-[400px]">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   <NetworkGraph />
+                  <MemoryVisualizer />
+                  <FileSystemExplorer />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Memory Visualizer */}
-            <Card className="col-span-1">
+            <Card>
               <CardHeader>
-                <CardTitle>Memory Analysis</CardTitle>
+                <CardTitle>{t("dashboard.alerts.title")}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-[400px]">
-                  <MemoryVisualizer />
-                </div>
+                <AlertPanel />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("dashboard.activity.title")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RecentActivityPanel />
               </CardContent>
             </Card>
           </div>
-
-          {/* File System Explorer */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>File System Explorer</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px]">
-                <FileSystemExplorer />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Alerts and Activity */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <AlertPanel />
-            <RecentActivityPanel />
-          </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </SidebarProvider>
   );
 }

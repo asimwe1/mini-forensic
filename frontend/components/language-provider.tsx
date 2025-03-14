@@ -1,116 +1,77 @@
-"use client"
+"use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react"
+import * as React from "react";
+import { createContext, useContext, useState } from "react";
 
-type Language = "en" | "fr"
-type Translations = Record<string, Record<Language, string>>
-
-const translations: Translations = {
-  dashboard: {
-    en: "Dashboard",
-    fr: "Tableau de bord",
-  },
-  network: {
-    en: "Network Analysis",
-    fr: "Analyse réseau",
-  },
-  memory: {
-    en: "Memory Analysis",
-    fr: "Analyse mémoire",
-  },
-  filesystem: {
-    en: "File System",
-    fr: "Système de fichiers",
-  },
-  reports: {
-    en: "Reports",
-    fr: "Rapports",
-  },
-  upload: {
-    en: "Upload",
-    fr: "Télécharger",
-  },
-  settings: {
-    en: "Settings",
-    fr: "Paramètres",
-  },
-  alerts: {
-    en: "Alerts",
-    fr: "Alertes",
-  },
-  metrics: {
-    en: "Metrics",
-    fr: "Métriques",
-  },
-  recentActivity: {
-    en: "Recent Activity",
-    fr: "Activité récente",
-  },
-  threatLevel: {
-    en: "Threat Level",
-    fr: "Niveau de menace",
-  },
-  high: {
-    en: "High",
-    fr: "Élevé",
-  },
-  medium: {
-    en: "Medium",
-    fr: "Moyen",
-  },
-  low: {
-    en: "Low",
-    fr: "Faible",
-  },
-  uploadFiles: {
-    en: "Upload Files",
-    fr: "Télécharger des fichiers",
-  },
-  dragAndDrop: {
-    en: "Drag and drop files here or click to browse",
-    fr: "Glissez et déposez des fichiers ici ou cliquez pour parcourir",
-  },
-  generateReport: {
-    en: "Generate Report",
-    fr: "Générer un rapport",
-  },
-  language: {
-    en: "Language",
-    fr: "Langue",
-  },
-  english: {
-    en: "English",
-    fr: "Anglais",
-  },
-  french: {
-    en: "French",
-    fr: "Français",
-  },
-}
+type Language = "en" | "fr";
 
 type LanguageContextType = {
-  language: Language
-  setLanguage: (lang: Language) => void
-  t: (key: string) => string
-}
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: string) => string;
+};
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
+const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined
+);
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>("en")
+const translations = {
+  en: {
+    "dashboard.title": "Dashboard",
+    "dashboard.welcome":
+      "Welcome back! Here's an overview of your forensic analysis.",
+    "dashboard.stats.network.title": "Network Activity",
+    "dashboard.stats.network.description": "Active connections",
+    "dashboard.stats.memory.title": "Memory Usage",
+    "dashboard.stats.memory.description": "Current memory footprint",
+    "dashboard.stats.files.title": "Files Analyzed",
+    "dashboard.stats.files.description": "Total files processed",
+    "dashboard.stats.threats.title": "Threat Level",
+    "dashboard.stats.threats.description": "Critical threats detected",
+    "dashboard.visualization.title": "Visualization",
+    "dashboard.alerts.title": "Alerts",
+    "dashboard.activity.title": "Recent Activity",
+  },
+  fr: {
+    "dashboard.title": "Tableau de bord",
+    "dashboard.welcome":
+      "Bon retour ! Voici un aperçu de votre analyse médico-légale.",
+    "dashboard.stats.network.title": "Activité réseau",
+    "dashboard.stats.network.description": "Connexions actives",
+    "dashboard.stats.memory.title": "Utilisation mémoire",
+    "dashboard.stats.memory.description": "Empreinte mémoire actuelle",
+    "dashboard.stats.files.title": "Fichiers analysés",
+    "dashboard.stats.files.description": "Total des fichiers traités",
+    "dashboard.stats.threats.title": "Niveau de menace",
+    "dashboard.stats.threats.description": "Menaces critiques détectées",
+    "dashboard.visualization.title": "Visualisation",
+    "dashboard.alerts.title": "Alertes",
+    "dashboard.activity.title": "Activité récente",
+  },
+};
+
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const [language, setLanguage] = useState<Language>("en");
 
   const t = (key: string): string => {
-    return translations[key]?.[language] || key
-  }
+    return (
+      translations[language][
+        key as keyof (typeof translations)[typeof language]
+      ] || key
+    );
+  };
 
-  return <LanguageContext.Provider value={{ language, setLanguage, t }}>{children}</LanguageContext.Provider>
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
 }
 
 export function useLanguage() {
-  const context = useContext(LanguageContext)
+  const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error("useLanguage must be used within a LanguageProvider")
+    throw new Error("useLanguage must be used within a LanguageProvider");
   }
-  return context
+  return context;
 }
-
