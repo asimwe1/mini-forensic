@@ -25,7 +25,7 @@ import {
   Settings,
   Shield,
   Upload,
-Languages,
+  Languages,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -35,7 +35,7 @@ export function LabSidebar() {
   const pathname = usePathname()
 
   const navItems = [
-    { name: t("dashboard"), icon: LayoutDashboard, path: "/" },
+    { name: t("dashboard"), icon: LayoutDashboard, path: "/dashboard" }, // Changed from "/" to "/dashboard"
     { name: t("network"), icon: Globe, path: "/network" },
     { name: t("memory"), icon: Database, path: "/memory" },
     { name: t("filesystem"), icon: Folder, path: "/filesystem" },
@@ -61,8 +61,12 @@ export function LabSidebar() {
             <SidebarMenu>
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton asChild isActive={pathname === item.path} tooltip={item.name}>
-                    <Link href={item.path}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={pathname === item.path || (item.path === "/dashboard" && pathname === "/")} 
+                    tooltip={item.name}
+                  >
+                    <Link href={item.path} className="flex items-center gap-2 w-full">
                       <item.icon className="h-5 w-5" />
                       <span>{item.name}</span>
                     </Link>
@@ -105,4 +109,3 @@ export function LabSidebar() {
     </Sidebar>
   )
 }
-

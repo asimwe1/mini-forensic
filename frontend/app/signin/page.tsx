@@ -84,7 +84,7 @@ export default function SignInPage() {
         </Link>
       </Button>
 
-      <div className="absolute inset-0 z-0 opacity-20">
+    <div className="absolute inset-0 z-0 opacity-20">
         <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-br from-primary/20 to-secondary/20 blur-3xl"></div>
       </div>
 
