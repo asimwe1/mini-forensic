@@ -44,7 +44,7 @@ interface NetworkConnection {
   bytes: number;
 }
 
-export default function NetworkAnalyzer() {
+export default function Pages() {
   const { t } = useLanguage();
   const [connections, setConnections] = useState<NetworkConnection[]>([]);
   const [searchQuery, setSearchQuery] = useState("");

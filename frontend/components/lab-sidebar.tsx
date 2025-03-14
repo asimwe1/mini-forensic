@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useLanguage } from "@/components/language-provider"
+import { useLanguage } from "@/components/language-provider";
 import {
   Sidebar,
   SidebarContent,
@@ -12,9 +12,14 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarGroupContent,
-} from "@/components/ui/sidebar"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+} from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   ActivitySquare,
   Database,
@@ -26,13 +31,14 @@ import {
   Shield,
   Upload,
   Languages,
-} from "lucide-react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function LabSidebar() {
-  const { t, language, setLanguage } = useLanguage()
-  const pathname = usePathname()
+  const { t, language, setLanguage } = useLanguage();
+  const pathname = usePathname();
 
   const navItems = [
     { name: t("dashboard"), icon: LayoutDashboard, path: "/dashboard" }, // Changed from "/" to "/dashboard"
@@ -41,14 +47,16 @@ export function LabSidebar() {
     { name: t("filesystem"), icon: Folder, path: "/filesystem" },
     { name: t("reports"), icon: FileDigit, path: "/reports" },
     { name: t("upload"), icon: Upload, path: "/upload" },
-  ]
+  ];
 
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-muted">
         <div className="flex items-center gap-2 px-4 py-2">
           <Shield className="h-6 w-6 text-primary" />
-          <span className="text-lg font-bold tracking-tight">Forensics Lab</span>
+          <span className="text-lg font-bold tracking-tight">
+            Forensics Lab
+          </span>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -61,12 +69,18 @@ export function LabSidebar() {
             <SidebarMenu>
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton 
-                    asChild 
-                    isActive={pathname === item.path || (item.path === "/dashboard" && pathname === "/")} 
+                  <SidebarMenuButton
+                    asChild
+                    isActive={
+                      pathname === item.path ||
+                      (item.path === "/dashboard" && pathname === "/")
+                    }
                     tooltip={item.name}
                   >
-                    <Link href={item.path} className="flex items-center gap-2 w-full">
+                    <Link
+                      href={item.path}
+                      className="flex items-center gap-2 w-full"
+                    >
                       <item.icon className="h-5 w-5" />
                       <span>{item.name}</span>
                     </Link>
@@ -79,6 +93,7 @@ export function LabSidebar() {
       </SidebarContent>
       <SidebarFooter className="border-t border-muted p-4">
         <div className="flex items-center justify-between">
+          <ThemeToggle />
           <Button variant="ghost" size="icon" asChild>
             <Link href="/settings">
               <Settings className="h-5 w-5" />
@@ -96,16 +111,20 @@ export function LabSidebar() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setLanguage("en")}>
                 {t("english")}
-                {language === "en" && <span className="ml-2 text-primary">✓</span>}
+                {language === "en" && (
+                  <span className="ml-2 text-primary">✓</span>
+                )}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setLanguage("fr")}>
                 {t("french")}
-                {language === "fr" && <span className="ml-2 text-primary">✓</span>}
+                {language === "fr" && (
+                  <span className="ml-2 text-primary">✓</span>
+                )}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }
