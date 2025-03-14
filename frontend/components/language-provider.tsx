@@ -1,14 +1,9 @@
-"use client";
+"use client"
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useState, type ReactNode } from "react"
 
-type Language = "en" | "fr";
-type Translations = Record<string, Record<Language, string>>;
+type Language = "en" | "fr"
+type Translations = Record<string, Record<Language, string>>
 
 const translations: Translations = {
   dashboard: {
@@ -91,36 +86,31 @@ const translations: Translations = {
     en: "French",
     fr: "Français",
   },
-};
+}
 
 type LanguageContextType = {
-  language: Language;
-  setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
-};
+  language: Language
+  setLanguage: (lang: Language) => void
+  t: (key: string) => string
+}
 
-const LanguageContext = createContext<LanguageContextType | undefined>(
-  undefined
-);
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>("en");
+  const [language, setLanguage] = useState<Language>("en")
 
   const t = (key: string): string => {
-    return translations[key]?.[language] || key;
-  };
+    return translations[key]?.[language] || key
+  }
 
-  return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
-      {children}
-    </LanguageContext.Provider>
-  );
+  return <LanguageContext.Provider value={{ language, setLanguage, t }}>{children}</LanguageContext.Provider>
 }
 
 export function useLanguage() {
-  const context = useContext(LanguageContext);
+  const context = useContext(LanguageContext)
   if (context === undefined) {
-    throw new Error("useLanguage must be used within a LanguageProvider");
+    throw new Error("useLanguage must be used within a LanguageProvider")
   }
-  return context;
+  return context
 }
+

@@ -1,11 +1,11 @@
 import type React from "react"
-import "@/app/globals.css"
+import "../../app/globals.css"
 import { Inter } from "next/font/google"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
-import { SidebarProvider } from "@/components/ui/sidebar"
-import { LabSidebar } from "@/components/lab-sidebar"
-import { LanguageProvider } from "@/components/language-provider"
+import { ThemeProvider } from "../components/theme-provider"
+import { Toaster } from "../components/ui/toaster"
+import { SidebarProvider } from "../components/ui/sidebar"
+import { LabSidebar } from "../components/lab-sidebar"
+import { LanguageProvider } from "../components/language-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 

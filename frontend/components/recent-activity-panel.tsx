@@ -1,16 +1,15 @@
-"use client";
+"use client"
 
-import React from "react";
-import { useLanguage } from "../components/language-provider";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Clock } from "lucide-react";
-import { motion } from "framer-motion";
+import { useLanguage } from "@/components/language-provider"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Clock } from "lucide-react"
+import { motion } from "framer-motion"
 
 type Activity = {
-  id: number;
-  action: string;
-  timestamp: string;
-};
+  id: number
+  action: string
+  timestamp: string
+}
 
 const activities: Activity[] = [
   {
@@ -33,10 +32,10 @@ const activities: Activity[] = [
     action: "Report generated",
     timestamp: "3 hours ago",
   },
-];
+]
 
 export function RecentActivityPanel() {
-  const { t } = useLanguage();
+  const { t } = useLanguage()
 
   return (
     <Card>
@@ -58,17 +57,14 @@ export function RecentActivityPanel() {
             >
               <div className="flex-shrink-0 w-2 h-2 rounded-full bg-primary" />
               <div className="space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  {activity.action}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {activity.timestamp}
-                </p>
+                <p className="text-sm font-medium leading-none">{activity.action}</p>
+                <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
               </div>
             </motion.div>
           ))}
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }
+

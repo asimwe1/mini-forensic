@@ -1,8 +1,7 @@
-"use client";
+"use client"
 
-import React from "react";
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { Canvas } from "@react-three/fiber"
+import { OrbitControls } from "@react-three/drei"
 
 // Simple placeholder component that doesn't use complex hooks or state
 function SimpleNetworkGraph() {
@@ -18,7 +17,7 @@ function SimpleNetworkGraph() {
         <OrbitControls />
       </Canvas>
     </div>
-  );
+  )
 }
 
 export function NetworkGraph() {
@@ -26,13 +25,10 @@ export function NetworkGraph() {
   return (
     <div className="w-full h-full flex items-center justify-center">
       <div className="text-center p-4">
-        <h3 className="text-lg font-medium text-primary mb-2">
-          Network Visualization
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          Interactive 3D network graph would display here.
-        </p>
+        <h3 className="text-lg font-medium text-primary mb-2">Network Visualization</h3>
+        <p className="text-sm text-muted-foreground">Interactive 3D network graph would display here.</p>
       </div>
     </div>
-  );
+  )
 }
+
