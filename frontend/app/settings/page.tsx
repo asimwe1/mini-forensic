@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,17 +12,29 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Moon, Sun, Bell, Globe, Shield, User, ArrowLeft } from "lucide-react";
+import {
+  Moon,
+  Sun,
+  Bell,
+  Globe,
+  Shield,
+  User,
+  ArrowLeft,
+  Languages,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/components/language-provider";
+
+type Language = "en" | "fr";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const router = useRouter();
+  const { t, language, setLanguage } = useLanguage();
   const [notifications, setNotifications] = useState(true);
-  const [language, setLanguage] = useState("en");
   const [privacyMode, setPrivacyMode] = useState(false);
 
   const handleThemeChange = (newTheme: string) => {
@@ -49,6 +61,15 @@ export default function SettingsPage() {
     });
   };
 
+  const handleLanguageChange = (newLanguage: Language) => {
+    setLanguage(newLanguage);
+    toast({
+      title: newLanguage === "en" ? "Language Updated" : "Langue Mise à Jour",
+      description:
+        newLanguage === "en" ? "Switched to English" : "Changé en Français",
+    });
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 md:py-8 space-y-6 md:space-y-8 max-w-4xl">
       <Button
@@ -58,13 +79,15 @@ export default function SettingsPage() {
         onClick={() => router.back()}
       >
         <ArrowLeft className="h-4 w-4" />
-        <span>Back</span>
+        <span>{t("common.back")}</span>
       </Button>
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-        <h1 className="text-2xl md:text-3xl font-bold">Settings</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">
+          {t("settings.title")}
+        </h1>
         <p className="text-sm md:text-base text-muted-foreground">
-          Manage your account settings and preferences
+          {t("settings.description")}
         </p>
       </div>
 
@@ -148,30 +171,41 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
-              <Globe className="h-5 w-5" />
-              Language
+              <Languages className="h-5 w-5" />
+              {t("settings.language")}
             </CardTitle>
-            <CardDescription>Choose your preferred language</CardDescription>
+            <CardDescription>
+              {t("settings.languageDescription")}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <Label>Language</Label>
+                <Label>{t("settings.languageLabel")}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Select your preferred language
+                  {t("settings.languageHelp")}
                 </p>
               </div>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="h-9 w-full sm:w-[180px] rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus:outline-none focus:ring-1 focus:ring-ring"
-              >
-                <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="fr">Français</option>
-                <option value="de">Deutsch</option>
-                <option value="it">Italiano</option>
-              </select>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant={language === "en" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleLanguageChange("en")}
+                  className="flex-1 sm:flex-none min-w-[120px]"
+                >
+                  <Globe className="h-4 w-4 mr-2" />
+                  English
+                </Button>
+                <Button
+                  variant={language === "fr" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleLanguageChange("fr")}
+                  className="flex-1 sm:flex-none min-w-[120px]"
+                >
+                  <Globe className="h-4 w-4 mr-2" />
+                  Français
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

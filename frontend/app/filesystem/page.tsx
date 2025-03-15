@@ -65,7 +65,6 @@ export default function FileSystemExplorer() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"tree" | "list">("tree");
 
-  // Mock data for demonstration
   const fileSystem: FileSystemNode = {
     id: "root",
     name: "root",
@@ -304,37 +303,32 @@ export default function FileSystemExplorer() {
           <div className="flex flex-col md:flex-row h-full gap-4">
             {/* File System Tree */}
             <Card className="w-full md:w-1/3 border-r">
-              <CardHeader className="space-y-2">
+              <CardHeader className="space-y-2 pb-4">
                 <CardTitle className="text-xl md:text-2xl">
                   File System
                 </CardTitle>
                 <CardDescription>Browse and analyze files</CardDescription>
+                <div className="flex items-center gap-2 pt-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Search files..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-8 h-8 text-sm"
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    title="Filter"
+                  >
+                    <Filter className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col sm:flex-row items-center gap-2 mb-4">
-                  <Input
-                    placeholder="Search files..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full sm:w-auto sm:flex-1"
-                  />
-                  <div className="flex gap-2 w-full sm:w-auto">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="flex-1 sm:flex-none"
-                    >
-                      <Search className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="flex-1 sm:flex-none"
-                    >
-                      <Filter className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
                 <ScrollArea className="h-[calc(100vh-300px)] md:h-[calc(100vh-200px)]">
                   {viewMode === "tree"
                     ? renderTreeNode(fileSystem)

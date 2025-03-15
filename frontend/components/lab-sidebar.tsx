@@ -36,7 +36,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ThemeToggle } from "@/components/theme-toggle";
+// import { ThemeToggle } from "@/components/theme-toggle";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
@@ -153,7 +153,7 @@ export function LabSidebar() {
             isCollapsed ? "flex-col gap-4" : "justify-between"
           )}
         >
-          <ThemeToggle />
+          {/* <ThemeToggle /> */}
           <Button variant="ghost" size="icon" asChild>
             <Link href="/settings">
               <Settings className="h-5 w-5" />

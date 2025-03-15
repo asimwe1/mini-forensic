@@ -80,16 +80,21 @@ export default function Pages() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen">
+      <div className="flex h-screen bg-background">
         <LabSidebar />
-        <div className="flex-1 overflow-auto">
-          <div className="container p-4 space-y-6">
-            <h1 className="text-3xl font-bold tracking-tight">
-              {t("network.title")}
-            </h1>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Card>
-                <CardHeader>
+        <div className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-6 space-y-6 max-w-7xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+                  {t("network.title")}
+                </h1>
+              </div>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <Card className="bg-card">
+                <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Activity className="h-4 w-4" />
                     {t("network.activeConnections")}
@@ -105,8 +110,8 @@ export default function Pages() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
+              <Card className="bg-card">
+                <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Globe className="h-4 w-4" />
                     {t("network.totalTraffic")}
@@ -125,8 +130,8 @@ export default function Pages() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
+              <Card className="bg-card">
+                <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Wifi className="h-4 w-4" />
                     {t("network.protocols")}
@@ -140,37 +145,53 @@ export default function Pages() {
               </Card>
             </div>
 
-            <Card>
+            <Card className="bg-card">
               <CardHeader>
-                <CardTitle>{t("network.connections")}</CardTitle>
+                <CardTitle className="text-lg font-semibold">
+                  {t("network.connections")}
+                </CardTitle>
                 <CardDescription>
                   {t("network.connectionsDescription")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder={t("network.search")}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="max-w-sm"
-                    />
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 max-w-sm">
+                      <Input
+                        placeholder={t("network.search")}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
                     <Button variant="outline" size="icon">
                       <Search className="h-4 w-4" />
                     </Button>
                   </div>
 
-                  <ScrollArea className="h-[400px]">
+                  <ScrollArea className="h-[400px] rounded-md border">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>{t("network.source")}</TableHead>
-                          <TableHead>{t("network.destination")}</TableHead>
-                          <TableHead>{t("network.protocol")}</TableHead>
-                          <TableHead>{t("network.port")}</TableHead>
-                          <TableHead>{t("network.status")}</TableHead>
-                          <TableHead>{t("network.timestamp")}</TableHead>
+                          <TableHead className="font-medium">
+                            {t("network.source")}
+                          </TableHead>
+                          <TableHead className="font-medium">
+                            {t("network.destination")}
+                          </TableHead>
+                          <TableHead className="font-medium">
+                            {t("network.protocol")}
+                          </TableHead>
+                          <TableHead className="font-medium">
+                            {t("network.port")}
+                          </TableHead>
+                          <TableHead className="font-medium">
+                            {t("network.status")}
+                          </TableHead>
+                          <TableHead className="font-medium">
+                            {t("network.timestamp")}
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -187,6 +208,7 @@ export default function Pages() {
                                     ? "default"
                                     : "secondary"
                                 }
+                                className="capitalize"
                               >
                                 {connection.status}
                               </Badge>

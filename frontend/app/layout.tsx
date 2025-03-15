@@ -3,7 +3,7 @@ import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/components/language-provider";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeToggle } from "@/components/theme-toggle";
+// import { ThemeToggle } from "@/components/theme-toggle";
 import { Toaster } from "@/components/ui/toaster";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { LabSidebar } from "@/components/lab-sidebar";
@@ -29,9 +29,6 @@ export default function RootLayout({
       <body className={`${spaceGrotesk.variable} font-sans antialiased`}>
         <ThemeProvider>
           <LanguageProvider>
-            <div className="fixed top-4 right-4 z-50 flex items-center gap-4">
-              <ThemeToggle />
-            </div>
             <div className="flex h-screen">
               <main className="flex-1 overflow-auto">{children}</main>
             </div>
