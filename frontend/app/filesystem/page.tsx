@@ -40,6 +40,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion, AnimatePresence } from "framer-motion";
 import { LabSidebar } from "@/components/lab-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { DashboardLayout } from "@/components/dashboard-layout";
 
 interface FileSystemNode {
   id: string;
@@ -296,148 +297,143 @@ export default function FileSystemExplorer() {
   };
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen">
-        <LabSidebar />
-        <div className="flex-1 overflow-hidden p-4 md:p-6">
-          <div className="flex flex-col md:flex-row h-full gap-4">
-            {/* File System Tree */}
-            <Card className="w-full md:w-1/3 border-r">
-              <CardHeader className="space-y-2 pb-4">
-                <CardTitle className="text-xl md:text-2xl">
-                  File System
+    <DashboardLayout>
+      <div className="flex flex-col md:flex-row h-full gap-4">
+        {/* File System Tree */}
+        <Card className="w-full md:w-1/3">
+          <CardHeader className="space-y-2 pb-4">
+            <CardTitle className="text-xl md:text-2xl">
+              File System
+            </CardTitle>
+            <CardDescription>Browse and analyze files</CardDescription>
+            <div className="flex items-center gap-2 pt-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  placeholder="Search files..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 h-8 text-sm"
+                />
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0"
+                title="Filter"
+              >
+                <Filter className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[calc(100vh-300px)] md:h-[calc(100vh-200px)]">
+              {viewMode === "tree"
+                ? renderTreeNode(fileSystem)
+                : renderListView()}
+            </ScrollArea>
+          </CardContent>
+        </Card>
+
+        {/* File Details */}
+        <div className="flex-1 min-w-0">
+          {selectedNode ? (
+            <Card className="h-full">
+              <CardHeader className="space-y-2">
+                <CardTitle className="flex items-center gap-2 text-xl md:text-2xl">
+                  {getFileIcon(selectedNode)}
+                  {selectedNode.name}
                 </CardTitle>
-                <CardDescription>Browse and analyze files</CardDescription>
-                <div className="flex items-center gap-2 pt-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                    <Input
-                      placeholder="Search files..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-8 h-8 text-sm"
-                    />
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    title="Filter"
-                  >
-                    <Filter className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
+                <CardDescription className="break-all">
+                  {selectedNode.path}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[calc(100vh-300px)] md:h-[calc(100vh-200px)]">
-                  {viewMode === "tree"
-                    ? renderTreeNode(fileSystem)
-                    : renderListView()}
-                </ScrollArea>
-              </CardContent>
-            </Card>
-
-            {/* File Details */}
-            <div className="flex-1 min-w-0">
-              {selectedNode ? (
-                <Card className="h-full">
-                  <CardHeader className="space-y-2">
-                    <CardTitle className="flex items-center gap-2 text-xl md:text-2xl">
-                      {getFileIcon(selectedNode)}
-                      {selectedNode.name}
-                    </CardTitle>
-                    <CardDescription className="break-all">
-                      {selectedNode.path}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <h3 className="font-medium text-lg">
-                          File Information
-                        </h3>
-                        <div className="space-y-3">
-                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Type:</span>
-                            <span className="font-medium">
-                              {selectedNode.type}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Size:</span>
-                            <span className="font-medium">
-                              {formatFileSize(selectedNode.size)}
-                            </span>
-                          </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h3 className="font-medium text-lg">
+                      File Information
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Type:</span>
+                        <span className="font-medium">
+                          {selectedNode.type}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Size:</span>
+                        <span className="font-medium">
+                          {formatFileSize(selectedNode.size)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">
+                          Modified:
+                        </span>
+                        <span className="font-medium">
+                          {selectedNode.modified || "N/A"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  {selectedNode.metadata && (
+                    <div className="space-y-4">
+                      <h3 className="font-medium text-lg">Metadata</h3>
+                      <div className="space-y-3">
+                        {selectedNode.metadata.mimeType && (
                           <div className="flex justify-between items-center">
                             <span className="text-muted-foreground">
-                              Modified:
+                              MIME Type:
                             </span>
                             <span className="font-medium">
-                              {selectedNode.modified || "N/A"}
+                              {selectedNode.metadata.mimeType}
                             </span>
                           </div>
-                        </div>
-                      </div>
-                      {selectedNode.metadata && (
-                        <div className="space-y-4">
-                          <h3 className="font-medium text-lg">Metadata</h3>
-                          <div className="space-y-3">
-                            {selectedNode.metadata.mimeType && (
-                              <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">
-                                  MIME Type:
-                                </span>
-                                <span className="font-medium">
-                                  {selectedNode.metadata.mimeType}
-                                </span>
-                              </div>
-                            )}
-                            {selectedNode.metadata.permissions && (
-                              <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">
-                                  Permissions:
-                                </span>
-                                <span className="font-medium">
-                                  {selectedNode.metadata.permissions}
-                                </span>
-                              </div>
-                            )}
-                            {selectedNode.metadata.owner && (
-                              <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">
-                                  Owner:
-                                </span>
-                                <span className="font-medium">
-                                  {selectedNode.metadata.owner}
-                                </span>
-                              </div>
-                            )}
-                            {selectedNode.metadata.group && (
-                              <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">
-                                  Group:
-                                </span>
-                                <span className="font-medium">
-                                  {selectedNode.metadata.group}
-                                </span>
-                              </div>
-                            )}
+                        )}
+                        {selectedNode.metadata.permissions && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">
+                              Permissions:
+                            </span>
+                            <span className="font-medium">
+                              {selectedNode.metadata.permissions}
+                            </span>
                           </div>
-                        </div>
-                      )}
+                        )}
+                        {selectedNode.metadata.owner && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">
+                              Owner:
+                            </span>
+                            <span className="font-medium">
+                              {selectedNode.metadata.owner}
+                            </span>
+                          </div>
+                        )}
+                        {selectedNode.metadata.group && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">
+                              Group:
+                            </span>
+                            <span className="font-medium">
+                              {selectedNode.metadata.group}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground text-lg">
-                  Select a file or directory to view details
+                  )}
                 </div>
-              )}
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground text-lg">
+              Select a file or directory to view details
             </div>
-          </div>
+          )}
         </div>
       </div>
-    </SidebarProvider>
+    </DashboardLayout>
   );
 }

@@ -40,6 +40,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { LabSidebar } from "@/components/lab-sidebar";
+import { DashboardLayout } from "@/components/dashboard-layout";
 
 interface MemoryRegion {
   address: string;
@@ -58,7 +59,7 @@ interface ProcessInfo {
   status: string;
 }
 
-export default function Pages() {
+export default function MemoryPage() {
   const { t } = useLanguage();
   const [viewMode, setViewMode] = useState<"hex" | "binary" | "ascii">("hex");
   const [searchQuery, setSearchQuery] = useState("");
@@ -91,10 +92,9 @@ export default function Pages() {
   ];
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen">
-        <LabSidebar />
-        <div className="w-64 border-r p-4 space-y-4">
+    <DashboardLayout>
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="w-full md:w-64 space-y-4">
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
@@ -108,7 +108,8 @@ export default function Pages() {
             Total Memory: 16 GB
           </div>
         </div>
-        <div className="flex-1 overflow-auto p-4">
+
+        <div className="flex-1">
           <Card>
             <CardHeader>
               <CardTitle>Memory Analysis</CardTitle>
@@ -125,7 +126,9 @@ export default function Pages() {
                   <div className="flex items-center justify-between">
                     <Select
                       value={viewMode}
-                      onValueChange={(value) => setViewMode(value as "hex" | "binary" | "ascii")}
+                      onValueChange={(value) =>
+                        setViewMode(value as "hex" | "binary" | "ascii")
+                      }
                     >
                       <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="View Mode" />
@@ -193,6 +196,6 @@ export default function Pages() {
           </Card>
         </div>
       </div>
-    </SidebarProvider>
+    </DashboardLayout>
   );
 }
