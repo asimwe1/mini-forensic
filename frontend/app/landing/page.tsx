@@ -133,13 +133,13 @@ export default function LandingPage() {
                   Contact
                 </button>
               </nav>
-          </div>
-          <div className="flex items-center gap-4">
+            </div>
+            <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
                 <span>Already have an account?</span>
                 <Link href="/signin" className="text-primary hover:underline">
-              Sign In
-            </Link>
+                  Sign In
+                </Link>
               </div>
               <Button
                 asChild
@@ -158,7 +158,7 @@ export default function LandingPage() {
                 ) : (
                   <Menu className="h-5 w-5" />
                 )}
-            </Button>
+              </Button>
             </div>
           </div>
         </div>
@@ -556,47 +556,41 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                name: "Dr. Sarah Chen",
-                role: "Founder & CEO",
+                name: "Ntwali David",
+                role: "Frontend Developer",
                 bio: "Former FBI digital forensics specialist with 15+ years of experience in cybersecurity.",
                 image: "/team/sarah.jpg",
                 gradient: "from-blue-500/20 to-cyan-500/20",
               },
               {
-                name: "Michael Rodriguez",
-                role: "Lead Developer",
+                name: "Sewase Angel",
+                role: "Frontend Developer",
                 bio: "Full-stack developer specializing in 3D visualization and real-time data processing.",
                 image: "/team/michael.jpg",
                 gradient: "from-purple-500/20 to-pink-500/20",
               },
               {
-                name: "Dr. Emily Watson",
-                role: "Security Director",
+                name: "Asimwe Landry",
+                role: "Python Developer",
                 bio: "PhD in Computer Security with expertise in memory forensics and malware analysis.",
                 image: "/team/emily.jpg",
                 gradient: "from-orange-500/20 to-red-500/20",
               },
               {
-                name: "James Wilson",
-                role: "Product Manager",
+                name: "Mugisha Prosper",
+                role: "Python Developer",
                 bio: "Product strategist with experience in cybersecurity and forensic tools.",
                 image: "/team/james.jpg",
                 gradient: "from-green-500/20 to-emerald-500/20",
               },
               {
-                name: "Lisa Thompson",
-                role: "UX Designer",
+                name: "Kagabo Lucky",
+                role: "Python Developer",
                 bio: "Award-winning designer focused on making complex forensic tools accessible.",
                 image: "/team/lisa.jpg",
                 gradient: "from-indigo-500/20 to-violet-500/20",
               },
-              {
-                name: "David Kim",
-                role: "Research Lead",
-                bio: "Leading research in advanced visualization techniques for digital forensics.",
-                image: "/team/david.jpg",
-                gradient: "from-rose-500/20 to-pink-500/20",
-              },
+              
             ].map((member, index) => (
               <motion.div
                 key={index}

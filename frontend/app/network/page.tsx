@@ -83,16 +83,14 @@ export default function Pages() {
       <div className="flex h-screen bg-background">
         <LabSidebar />
         <div className="flex-1 overflow-y-auto">
-          <div className="container mx-auto p-6 space-y-6 max-w-7xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-                  {t("network.title")}
-                </h1>
-              </div>
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-7xl">
+            <div className="space-y-2 mb-6">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                {t("network.title")}
+              </h1>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               <Card className="bg-card">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -101,7 +99,7 @@ export default function Pages() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div className="text-xl sm:text-2xl font-bold">
                     {
                       mockConnections.filter((c) => c.status === "active")
                         .length
@@ -118,7 +116,7 @@ export default function Pages() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div className="text-xl sm:text-2xl font-bold">
                     {(
                       mockConnections.reduce(
                         (acc, curr) => acc + curr.bytes,
@@ -138,26 +136,26 @@ export default function Pages() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div className="text-xl sm:text-2xl font-bold">
                     {new Set(mockConnections.map((c) => c.protocol)).size}
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            <Card className="bg-card">
+            <Card className="bg-card mt-6">
               <CardHeader>
-                <CardTitle className="text-lg font-semibold">
+                <CardTitle className="text-lg sm:text-xl font-semibold">
                   {t("network.connections")}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-sm">
                   {t("network.connectionsDescription")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 max-w-sm">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <div className="w-full sm:w-auto sm:flex-1 max-w-sm">
                       <Input
                         placeholder={t("network.search")}
                         value={searchQuery}
@@ -165,60 +163,78 @@ export default function Pages() {
                         className="w-full"
                       />
                     </div>
-                    <Button variant="outline" size="icon">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="w-full sm:w-auto"
+                    >
                       <Search className="h-4 w-4" />
                     </Button>
                   </div>
 
-                  <ScrollArea className="h-[400px] rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="font-medium">
-                            {t("network.source")}
-                          </TableHead>
-                          <TableHead className="font-medium">
-                            {t("network.destination")}
-                          </TableHead>
-                          <TableHead className="font-medium">
-                            {t("network.protocol")}
-                          </TableHead>
-                          <TableHead className="font-medium">
-                            {t("network.port")}
-                          </TableHead>
-                          <TableHead className="font-medium">
-                            {t("network.status")}
-                          </TableHead>
-                          <TableHead className="font-medium">
-                            {t("network.timestamp")}
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {mockConnections.map((connection) => (
-                          <TableRow key={connection.id}>
-                            <TableCell>{connection.source}</TableCell>
-                            <TableCell>{connection.destination}</TableCell>
-                            <TableCell>{connection.protocol}</TableCell>
-                            <TableCell>{connection.port}</TableCell>
-                            <TableCell>
-                              <Badge
-                                variant={
-                                  connection.status === "active"
-                                    ? "default"
-                                    : "secondary"
-                                }
-                                className="capitalize"
-                              >
-                                {connection.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{connection.timestamp}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </ScrollArea>
+                  <div className="rounded-md border overflow-hidden">
+                    <ScrollArea className="h-[400px] sm:h-[500px]">
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="font-medium whitespace-nowrap min-w-[120px]">
+                                {t("network.source")}
+                              </TableHead>
+                              <TableHead className="font-medium whitespace-nowrap min-w-[120px]">
+                                {t("network.destination")}
+                              </TableHead>
+                              <TableHead className="font-medium whitespace-nowrap min-w-[100px]">
+                                {t("network.protocol")}
+                              </TableHead>
+                              <TableHead className="font-medium whitespace-nowrap min-w-[80px]">
+                                {t("network.port")}
+                              </TableHead>
+                              <TableHead className="font-medium whitespace-nowrap min-w-[100px]">
+                                {t("network.status")}
+                              </TableHead>
+                              <TableHead className="font-medium whitespace-nowrap min-w-[160px]">
+                                {t("network.timestamp")}
+                              </TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {mockConnections.map((connection) => (
+                              <TableRow key={connection.id}>
+                                <TableCell className="whitespace-nowrap">
+                                  {connection.source}
+                                </TableCell>
+                                <TableCell className="whitespace-nowrap">
+                                  {connection.destination}
+                                </TableCell>
+                                <TableCell className="whitespace-nowrap">
+                                  {connection.protocol}
+                                </TableCell>
+                                <TableCell className="whitespace-nowrap">
+                                  {connection.port}
+                                </TableCell>
+                                <TableCell className="whitespace-nowrap">
+                                  <Badge
+                                    variant={
+                                      connection.status === "active"
+                                        ? "default"
+                                        : "secondary"
+                                    }
+                                    className="capitalize"
+                                  >
+                                    {connection.status}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="whitespace-nowrap">
+                                  {connection.timestamp}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </ScrollArea>
+                  </div>
                 </div>
               </CardContent>
             </Card>

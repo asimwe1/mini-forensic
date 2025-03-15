@@ -48,18 +48,31 @@ export function LabSidebar() {
 
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
-      setIsCollapsed(window.innerWidth < 768);
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      // Auto collapse on mobile
+      if (mobile) {
+        setIsCollapsed(true);
+      }
     };
 
     // Initial check
     checkScreenSize();
 
-    // Add event listener
-    window.addEventListener("resize", checkScreenSize);
+    // Add event listener with debounce
+    let timeoutId: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(checkScreenSize, 100);
+    };
+
+    window.addEventListener("resize", handleResize);
 
     // Cleanup
-    return () => window.removeEventListener("resize", checkScreenSize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const navItems = [
@@ -72,119 +85,143 @@ export function LabSidebar() {
   ];
 
   return (
-    <Sidebar
-      className={cn(
-        "transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-[60px]" : "w-[240px]",
-        isMobile && isCollapsed && "w-0"
+    <>
+      {/* Mobile Toggle Button - Only visible on mobile */}
+      {isMobile && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="fixed top-4 left-4 z-50 md:hidden"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+        >
+          {isCollapsed ? (
+            <Menu className="h-5 w-5" />
+          ) : (
+            <X className="h-5 w-5" />
+          )}
+        </Button>
       )}
-    >
-      <SidebarHeader className="border-b border-muted relative">
-        <div
-          className={cn(
-            "flex items-center gap-2 px-4 py-2",
-            isCollapsed && "justify-center"
-          )}
-        >
-          <Shield className="h-6 w-6 text-primary" />
-          {!isCollapsed && (
-            <span className="text-lg font-bold tracking-tight">
-              Forensics Lab
-            </span>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-2 top-2 lg:hidden"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-          >
-            {isCollapsed ? (
-              <Menu className="h-4 w-4" />
-            ) : (
-              <X className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel
-            className={cn(
-              "flex items-center",
-              isCollapsed && "justify-center px-0"
-            )}
-          >
-            <ActivitySquare className="h-4 w-4" />
-            {!isCollapsed && <span className="ml-2">{t("navigation")}</span>}
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={
-                      pathname === item.path ||
-                      (item.path === "/dashboard" && pathname === "/")
-                    }
-                    tooltip={isCollapsed ? item.name : undefined}
-                  >
-                    <Link
-                      href={item.path}
-                      className={cn(
-                        "flex items-center gap-2 w-full",
-                        isCollapsed && "justify-center px-0"
-                      )}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      {!isCollapsed && <span>{item.name}</span>}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarFooter className="border-t border-muted p-4">
-        <div
-          className={cn(
-            "flex items-center",
-            isCollapsed ? "flex-col gap-4" : "justify-between"
-          )}
-        >
-          {/* <ThemeToggle /> */}
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/settings">
-              <Settings className="h-5 w-5" />
-              <span className="sr-only">{t("settings")}</span>
-            </Link>
-          </Button>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Languages className="h-5 w-5" />
-                <span className="sr-only">{t("language")}</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setLanguage("en")}>
-                {t("english")}
-                {language === "en" && (
-                  <span className="ml-2 text-primary">✓</span>
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLanguage("fr")}>
-                {t("french")}
-                {language === "fr" && (
-                  <span className="ml-2 text-primary">✓</span>
-                )}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </SidebarFooter>
-    </Sidebar>
+      {/* Mobile Overlay - Only shown when sidebar is open on mobile */}
+      {isMobile && !isCollapsed && (
+        <div
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
+          onClick={() => setIsCollapsed(true)}
+        />
+      )}
+
+      <Sidebar
+        className={cn(
+          "transition-all duration-300 ease-in-out",
+          isCollapsed ? "w-0 md:w-[60px]" : "w-[240px]",
+          isMobile ? "fixed left-0 top-0 bottom-0 z-50" : "relative",
+          isMobile && isCollapsed && "-translate-x-full md:translate-x-0"
+        )}
+      >
+        <SidebarHeader className="border-b border-muted h-14">
+          <div
+            className={cn(
+              "flex items-center gap-2 px-4 h-full",
+              isCollapsed && !isMobile && "justify-center"
+            )}
+          >
+            <Shield className="h-6 w-6 text-primary shrink-0" />
+            {(!isCollapsed || isMobile) && (
+              <span className="text-lg font-bold tracking-tight truncate">
+                Forensics Lab
+              </span>
+            )}
+          </div>
+        </SidebarHeader>
+
+        <SidebarContent className="px-2">
+          <SidebarGroup>
+            <SidebarGroupLabel
+              className={cn(
+                "flex items-center px-2 py-2",
+                isCollapsed && !isMobile && "justify-center"
+              )}
+            >
+              <ActivitySquare className="h-4 w-4 shrink-0" />
+              {(!isCollapsed || isMobile) && (
+                <span className="ml-2 truncate">{t("navigation")}</span>
+              )}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {navItems.map((item) => (
+                  <SidebarMenuItem key={item.path}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={
+                        pathname === item.path ||
+                        (item.path === "/dashboard" && pathname === "/")
+                      }
+                      tooltip={isCollapsed && !isMobile ? item.name : undefined}
+                    >
+                      <Link
+                        href={item.path}
+                        className={cn(
+                          "flex items-center gap-2 w-full px-2 py-2 rounded-md",
+                          isCollapsed && !isMobile && "justify-center"
+                        )}
+                        onClick={() => isMobile && setIsCollapsed(true)}
+                      >
+                        <item.icon className="h-5 w-5 shrink-0" />
+                        {(!isCollapsed || isMobile) && (
+                          <span className="truncate">{item.name}</span>
+                        )}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+
+        <SidebarFooter className="border-t border-muted p-4">
+          <div
+            className={cn(
+              "flex items-center gap-2",
+              isCollapsed && !isMobile ? "flex-col" : "justify-between"
+            )}
+          >
+            <Button variant="ghost" size="icon" asChild className="shrink-0">
+              <Link href="/settings">
+                <Settings className="h-5 w-5" />
+                <span className="sr-only">{t("settings")}</span>
+              </Link>
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="shrink-0">
+                  <Languages className="h-5 w-5" />
+                  <span className="sr-only">{t("language")}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className={cn("w-[160px]", isCollapsed && !isMobile && "ml-2")}
+              >
+                <DropdownMenuItem onClick={() => setLanguage("en")}>
+                  {t("english")}
+                  {language === "en" && (
+                    <span className="ml-2 text-primary">✓</span>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLanguage("fr")}>
+                  {t("french")}
+                  {language === "fr" && (
+                    <span className="ml-2 text-primary">✓</span>
+                  )}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </SidebarFooter>
+      </Sidebar>
+    </>
   );
 }
