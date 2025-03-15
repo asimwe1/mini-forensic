@@ -55,7 +55,10 @@ async def upload_file(file: UploadFile, db: Session = Depends(get_db)):
     upload_result = cloudinary.uploader.upload(
         file_content,
         folder=settings.CLOUDINARY_FOLDER,
-        resource_type="raw"  # For non-image files like PCAPs or memory dumps
+        # resource_type="raw",
+        api_key=settings.CLOUDINARY_API_KEY,
+        api_secret=settings.CLOUDINARY_API_SECRET,
+        cloud_name=settings.CLOUDINARY_CLOUD_NAME
     )
     cloudinary_url = upload_result["secure_url"]
     logger.info(f"Uploaded {file.filename} to Cloudinary: {cloudinary_url}")
@@ -66,6 +69,7 @@ async def upload_file(file: UploadFile, db: Session = Depends(get_db)):
         cloudinary_url=cloudinary_url,
         size=file_size,
         file_type=mime_type,
+        user_id=1
     )
     db.add(db_file)
     db.commit()
@@ -80,7 +84,7 @@ async def upload_file(file: UploadFile, db: Session = Depends(get_db)):
         task = analyze_network_task.delay(pcap_file=cloudinary_url, file_id=db_file.id)
         logger.info(f"Triggered network analysis for file ID {db_file.id}, task ID {task.id}")
     else:
-        result = await analyze_file(cloudinary_url)  # Adjust if not async
+        result = await analyze_file(cloudinary_url) 
         db_file_analysis = FileAnalysis(file_id=db_file.id, metadata_json=json.dumps(result))
         db.add(db_file_analysis)
         db.commit()

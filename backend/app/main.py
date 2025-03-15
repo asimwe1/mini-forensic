@@ -2,20 +2,30 @@ import logging
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from typing import List
+from typing import AsyncGenerator, List
 from core.db import get_db, init_db
 from core.config import settings
 from api.endpoint import router as api_router
 from services.memory_analysis import app_celery  # Celery instance shared across services
 from models import File, User, Report, Task  # Assuming updated models
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
 from core.db import get_db, init_db
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title=settings.PROJECT_NAME, debug=settings.DEBUG)
+# Initialize database on startup
+@asynccontextmanager
+async def lifespan(api: FastAPI):
+    init_db()
+    logger.info("Database initialized")
+    yield
+    logger.info("Shutdown complete") 
+
+
+app = FastAPI(title=settings.PROJECT_NAME, debug=settings.DEBUG, lifespan=lifespan)
 
 # CORS middleware
 app.add_middleware(
@@ -26,8 +36,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include API routes
-app.include_router(api_router)
+
+app.include_router(api_router, prefix="/api")
 
 # Root endpoint
 @app.get("/")
@@ -67,11 +77,9 @@ def list_files(db: Session = Depends(get_db)):
     files = db.query(File).all()
     return [{"id": f.id, "filename": f.filename, "analysis_status": f.analysis_status} for f in files]
 
-# Initialize database on startup
-@app.on_event("startup")
-def startup_event():
-    init_db()
-    logger.info("Database initialized on startup")
+
+# app.router.lifespan_context = lifespan
+
 
 if __name__ == "__main__":
     import uvicorn

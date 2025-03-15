@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY: Optional[str] = Field(default=None, env="CLOUDINARY_API_KEY")
     CLOUDINARY_API_SECRET: Optional[str] = Field(default=None, env="CLOUDINARY_API_SECRET")
     CLOUDINARY_UPLOAD_PRESET: Optional[str] = Field(default=None, env="CLOUDINARY_UPLOAD_PRESET")
-    CLOUDINARY_FOLDER: str = Field(default="mini_forensic_uploads", env="CLOUDINARY_FOLDER")
+    CLOUDINARY_FOLDER: str = Field(default="forensic-lab", env="CLOUDINARY_FOLDER")
 
     # Validators
     @field_validator("DEBUG", mode="before")

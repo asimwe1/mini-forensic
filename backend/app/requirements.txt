@@ -6,3 +6,4 @@ reportlab
 scapy
 volatility3
 celery
+dotenv
