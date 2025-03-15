@@ -4,8 +4,8 @@ from concurrent.futures import ThreadPoolExecutor
 from volatility3.framework import contexts, exceptions
 from volatility3.framework.automagic import stacker
 import volatility3.framework.interfaces.plugins as plugins
-from app.core.db import SessionLocal
-from app.models import MemoryAnalysis
+from core.db import SessionLocal
+from models import MemoryAnalysis
 import json
 from celery import Celery
 
@@ -55,7 +55,7 @@ def list_loaded_modules(context):
     return [{"BaseAddress": row[0], "ModuleName": row[1]} for row in grid]
 
 @app_celery.task
-def analyze_memory_task(file_path: str, file_id: int):
+def analyze_memory_task(self, file_path: str, file_id: int):
     context = load_memory_dump(file_path)
     processes = list_processes(context)
     network_connections = list_network_connections(context)
@@ -68,7 +68,7 @@ def analyze_memory_task(file_path: str, file_id: int):
     }
 
     db = SessionLocal()
-    analysis = MemoryAnalysis(
+    analysis = analyze_memory_task(
         file_id=file_id,
         result_json=json.dumps(result)
     )
