@@ -10,6 +10,8 @@ app = FastAPI()
 # Configuration
 UPLOAD_FOLDER = '../../../uploads'
 ALLOWED_MIME_TYPES = {'text/plain', 'application/pdf', 'image/jpeg', 'image/png', 'image/gif'}
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx'}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 # CORS middleware
 app.add_middleware(
@@ -23,6 +25,20 @@ app.add_middleware(
 def allowed_file(filename: str) -> bool:
     mime_type = magic.from_buffer(file_content[:2048], mime=True)
     return mime_type in ALLOWED_MIME_TYPES
+
+def validate_file(file: UploadFile) -> None:
+    # Check file size
+    file.file.seek(0, 2)
+    size = file.file.tell()
+    file.file.seek(0)
+    
+    if size > MAX_FILE_SIZE:
+        raise FileValidationError(detail=f"File size exceeds maximum limit of {MAX_FILE_SIZE/1024/1024}MB")
+    
+    # Check file extension
+    ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+    if ext not in ALLOWED_EXTENSIONS:
+        raise FileValidationError(detail="File type not allowed")
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):

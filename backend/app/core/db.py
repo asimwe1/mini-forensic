@@ -79,7 +79,18 @@ def get_db() -> Generator:
 
 def init_db():
     """Initialize the database by creating all tables defined in models."""
-    from models import File, Log, MemoryAnalysis, NetworkAnalysis, FileAnalysis, User, Report, Task
+    from models import (
+        Base,
+        File,
+        Log,
+        MemoryAnalysis,
+        NetworkAnalysis,
+        FileAnalysis,
+        User,
+        Report,
+        Task,
+        AnalysisTask
+    )
     try:
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables initialized")
