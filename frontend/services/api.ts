@@ -20,13 +20,15 @@ api.interceptors.request.use(
 		}
 		return config;
 	},
-	(error) => {
+	/// @ts-ignore 
+	(error: any) => {
 		return Promise.reject(error);
 	}
 );
 
 // Response interceptor for handling errors
 api.interceptors.response.use(
+
 	(response) => response,
 	(error) => {
 		const message = error.response?.data?.detail || 'An error occurred';
@@ -202,5 +204,26 @@ export const apiService = {
 			sessionId ? `&session_id=${sessionId}` : ''
 		}`;
 		return new WebSocket(wsUrl);
+	},
+
+	// OAuth methods
+	getGithubAuthUrl: async (): Promise<string> => {
+		const response = await api.get('/auth/github/login');
+		return response.data.authorize_url;
+	},
+	
+	getGoogleAuthUrl: async (): Promise<string> => {
+		const response = await api.get('/auth/google/login');
+		return response.data.authorize_url;
+	},
+	
+	// Process OAuth tokens from URL
+	processOAuthRedirect: (urlParams: URLSearchParams): string | null => {
+		const token = urlParams.get('token');
+		if (token) {
+			localStorage.setItem('token', token);
+			return token;
+		}
+		return null;
 	},
 };

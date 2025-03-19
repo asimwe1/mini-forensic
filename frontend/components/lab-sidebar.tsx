@@ -33,18 +33,21 @@ import {
   Languages,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 // import { ThemeToggle } from "@/components/theme-toggle";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
 
 export function LabSidebar() {
   const { t, language, setLanguage } = useLanguage();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const { logout } = useAuth();
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -219,6 +222,16 @@ export function LabSidebar() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start"
+              onClick={() => logout()}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              <span className={!isCollapsed || isMobile ? "block" : "hidden"}>Logout</span>
+            </Button>
           </div>
         </SidebarFooter>
       </Sidebar>

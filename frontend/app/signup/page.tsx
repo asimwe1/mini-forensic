@@ -28,17 +28,22 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { useLanguage } from "@/components/language-provider";
+import { useAuth } from "@/lib/auth-context";
+import { apiService } from "@/services/api";
 
 export default function SignUpPage() {
   const { t } = useLanguage();
+  const { register, isLoading } = useAuth();
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
+    name: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<'google' | 'github' | null>(null);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -114,31 +119,51 @@ export default function SignUpPage() {
       return;
     }
 
-    setIsLoading(true);
-
-    // Simulate account creation
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await register(formData.name, formData.email, formData.password);
       toast({
         title: "Account created",
         description: "Your account has been created successfully",
       });
-      // In a real app, you would redirect to the dashboard or sign-in page here
-    }, 1500);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create account. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleGoogleSignUp = () => {
-    toast({
-      title: "Google Sign Up",
-      description: "Google authentication will be implemented soon.",
-    });
+  const handleGoogleSignUp = async () => {
+    try {
+      setOauthLoading('google');
+      const authUrl = await apiService.getGoogleAuthUrl();
+      window.location.href = authUrl;
+    } catch (error) {
+      console.error("Failed to get Google auth URL:", error);
+      toast({
+        title: "Error",
+        description: "Failed to initiate Google authentication",
+        variant: "destructive",
+      });
+      setOauthLoading(null);
+    }
   };
 
-  const handleGithubSignUp = () => {
-    toast({
-      title: "GitHub Sign Up",
-      description: "GitHub authentication will be implemented soon.",
-    });
+  const handleGithubSignUp = async () => {
+    try {
+      setOauthLoading('github');
+      const authUrl = await apiService.getGithubAuthUrl();
+      window.location.href = authUrl;
+    } catch (error) {
+      console.error("Failed to get GitHub auth URL:", error);
+      toast({
+        title: "Error",
+        description: "Failed to initiate GitHub authentication",
+        variant: "destructive",
+      });
+      setOauthLoading(null);
+    }
   };
 
   return (

@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { LabSidebar } from "@/components/lab-sidebar";
+import { AuthProvider } from "@/lib/auth-context";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -29,10 +30,12 @@ export default function RootLayout({
       <body className={`${spaceGrotesk.variable} font-sans antialiased`}>
         <ThemeProvider>
           <LanguageProvider>
-            <div className="flex h-screen">
-              <main className="flex-1 overflow-auto">{children}</main>
-            </div>
-            <Toaster />
+            <AuthProvider>
+              <div className="flex h-screen">
+                <main className="flex-1 overflow-auto">{children}</main>
+              </div>
+              <Toaster />
+            </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>

@@ -89,6 +89,18 @@ class Settings(BaseSettings):
     # Authentication settings
     ALGORITHM: str = Field(default="HS256", env="ALGORITHM")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30, env="ACCESS_TOKEN_EXPIRE_MINUTES")
+    
+    # OAuth settings
+    GITHUB_CLIENT_ID: str = Field(default="", env="GITHUB_CLIENT_ID")
+    GITHUB_CLIENT_SECRET: str = Field(default="", env="GITHUB_CLIENT_SECRET")
+    GITHUB_REDIRECT_URI: str = Field(default="http://localhost:8000/api/v1/auth/github/callback", env="GITHUB_REDIRECT_URI")
+    
+    GOOGLE_CLIENT_ID: str = Field(default="", env="GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET: str = Field(default="", env="GOOGLE_CLIENT_SECRET")
+    GOOGLE_REDIRECT_URI: str = Field(default="http://localhost:8000/api/v1/auth/google/callback", env="GOOGLE_REDIRECT_URI")
+    
+    # Frontend URL for redirects after authentication
+    FRONTEND_URL: str = Field(default="http://localhost:3000/auth-callback", env="FRONTEND_URL")
 
     # File upload settings
     MAX_FILE_SIZES: Dict[str, int] = Field(

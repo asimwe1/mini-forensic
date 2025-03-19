@@ -26,14 +26,17 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { useLanguage } from "@/components/language-provider";
+import { useAuth } from "@/lib/auth-context";
+import { apiService } from "@/services/api";
 
 export default function SignInPage() {
   const { t } = useLanguage();
+  const { login, isLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const [oauthLoading, setOauthLoading] = useState<'google' | 'github' | null>(null);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -47,31 +50,51 @@ export default function SignInPage() {
       return;
     }
 
-    setIsLoading(true);
-
-    // Simulate authentication
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await login(email, password);
       toast({
         title: "Success",
         description: "You have been signed in",
       });
-      // In a real app, you would redirect to the dashboard here
-    }, 1500);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Invalid email or password",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleGoogleSignIn = () => {
-    toast({
-      title: "Google Sign In",
-      description: "Google authentication will be implemented soon.",
-    });
+  const handleGoogleSignIn = async () => {
+    try {
+      setOauthLoading('google');
+      const authUrl = await apiService.getGoogleAuthUrl();
+      window.location.href = authUrl;
+    } catch (error) {
+      console.error("Failed to get Google auth URL:", error);
+      toast({
+        title: "Error",
+        description: "Failed to initiate Google authentication",
+        variant: "destructive",
+      });
+      setOauthLoading(null);
+    }
   };
 
-  const handleGithubSignIn = () => {
-    toast({
-      title: "GitHub Sign In",
-      description: "GitHub authentication will be implemented soon.",
-    });
+  const handleGithubSignIn = async () => {
+    try {
+      setOauthLoading('github');
+      const authUrl = await apiService.getGithubAuthUrl();
+      window.location.href = authUrl;
+    } catch (error) {
+      console.error("Failed to get GitHub auth URL:", error);
+      toast({
+        title: "Error",
+        description: "Failed to initiate GitHub authentication",
+        variant: "destructive",
+      });
+      setOauthLoading(null);
+    }
   };
 
   return (
