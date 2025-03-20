@@ -1,23 +1,15 @@
 import type { Metadata } from "next";
-import { Space_Grotesk } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import { LanguageProvider } from "@/components/language-provider";
-import { ThemeProvider } from "@/components/theme-provider";
-// import { ThemeToggle } from "@/components/theme-toggle";
 import { Toaster } from "@/components/ui/toaster";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { LabSidebar } from "@/components/lab-sidebar";
+import { LanguageProvider } from "@/components/language-provider";
 import { AuthProvider } from "@/lib/auth-context";
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  display: "swap",
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Forensics Lab",
-  description: "Advanced Digital Forensics Platform",
+  title: "Mini Forensic",
+  description: "A modern digital forensics platform",
 };
 
 export default function RootLayout({
@@ -26,18 +18,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${spaceGrotesk.variable} font-sans antialiased`}>
-        <ThemeProvider>
+    <html lang="en">
+      <body className={inter.className}>
+        <AuthProvider>
           <LanguageProvider>
-            <AuthProvider>
-              <div className="flex h-screen">
-                <main className="flex-1 overflow-auto">{children}</main>
-              </div>
-              <Toaster />
-            </AuthProvider>
+            {children}
+            <Toaster />
           </LanguageProvider>
-        </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
