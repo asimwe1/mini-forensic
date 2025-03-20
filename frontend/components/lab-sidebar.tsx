@@ -34,6 +34,7 @@ import {
   Menu,
   X,
   LogOut,
+  User,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -41,6 +42,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
+import { apiService } from "@/services/api";
 
 export function LabSidebar() {
   const { t, language, setLanguage } = useLanguage();
@@ -86,6 +88,15 @@ export function LabSidebar() {
     { name: t("reports"), icon: FileDigit, path: "/reports" },
     { name: t("upload"), icon: Upload, path: "/upload" },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await apiService.logout();
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <>
@@ -227,10 +238,12 @@ export function LabSidebar() {
               variant="ghost"
               size="sm"
               className="w-full justify-start"
-              onClick={() => logout()}
+              onClick={handleLogout}
             >
               <LogOut className="mr-2 h-4 w-4" />
-              <span className={!isCollapsed || isMobile ? "block" : "hidden"}>Logout</span>
+              <span className={!isCollapsed || isMobile ? "block" : "hidden"}>
+                Logout
+              </span>
             </Button>
           </div>
         </SidebarFooter>

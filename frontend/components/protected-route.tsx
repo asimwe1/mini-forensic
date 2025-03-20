@@ -27,4 +27,4 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   return isAuthenticated ? <>{children}</> : null;
-} 
+}

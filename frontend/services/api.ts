@@ -1,229 +1,196 @@
-import { toast } from '@/hooks/use-toast';
-import axios from 'axios';
+import axios from "axios";
+import { toast } from "@/components/ui/use-toast";
 
-const API_BASE_URL =
-	process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const api = axios.create({
 	baseURL: API_BASE_URL,
 	headers: {
-		'Content-Type': 'application/json',
+		"Content-Type": "application/json",
 	},
 });
 
 // Request interceptor for adding auth token
 api.interceptors.request.use(
 	(config) => {
-		const token = localStorage.getItem('token');
+		const token = localStorage.getItem("token");
 		if (token) {
 			config.headers.Authorization = `Bearer ${token}`;
 		}
 		return config;
 	},
-	/// @ts-ignore 
-	(error: any) => {
+	(error) => {
 		return Promise.reject(error);
 	}
 );
 
 // Response interceptor for handling errors
 api.interceptors.response.use(
-
 	(response) => response,
 	(error) => {
-		const message = error.response?.data?.detail || 'An error occurred';
+		const message = error.response?.data?.message || "An error occurred";
 		toast({
-			title: 'Error',
+			title: "Error",
 			description: message,
-			variant: 'destructive',
+			variant: "destructive",
 		});
 		return Promise.reject(error);
 	}
 );
 
 export interface FileUploadResponse {
-	status: string;
-	message: string;
-	file_id: number;
+	id: string;
 	filename: string;
-	file_type: string;
 	size: number;
-	cloudinary_url: string;
-	analysis_status: string;
-	uploaded_at: string;
-	last_analyzed: string;
+	type: string;
+	status: "processing" | "completed" | "failed";
+	error?: string;
 }
 
 export interface FileListResponse {
-	status: string;
-	message: string;
-	items: FileUploadResponse[];
-	total: number;
-	page: number;
-	page_size: number;
+	files: Array<{
+		id: string;
+		filename: string;
+		size: number;
+		type: string;
+		status: "processing" | "completed" | "failed";
+		created_at: string;
+		updated_at: string;
+	}>;
 }
 
 export interface AnalysisResponse {
-	status: string;
-	message: string;
-	file_id: number;
-	analysis_status: string;
-	analysis_results: any;
-	progress: number;
-	task_id: string;
+	id: string;
+	file_id: string;
+	type: string;
+	status: "running" | "completed" | "failed";
+	results?: any;
+	error?: string;
+	created_at: string;
+	completed_at?: string;
 }
 
-// Add authentication interfaces
 export interface LoginRequest {
 	email: string;
 	password: string;
 }
 
 export interface RegisterRequest {
-	username: string;
 	email: string;
 	password: string;
-	full_name?: string;
+	name: string;
 }
 
 export interface AuthResponse {
-	access_token: string;
-	token_type: string;
+	token: string;
 	user: {
-		id: number;
-		username: string;
+		id: string;
 		email: string;
-		full_name?: string;
+		name: string;
 	};
 }
 
-export const apiService = {
-	// Authentication methods
-	login: async (data: LoginRequest): Promise<AuthResponse> => {
-		try {
-			const response = await api.post('/auth/login', data);
-			// Store the token in localStorage
-			if (response.data.access_token) {
-				localStorage.setItem('token', response.data.access_token);
-			}
-			return response.data;
-		} catch (error) {
-			console.error('Login error:', error);
-			throw error;
-		}
-	},
+class ApiService {
+	// Authentication
+	async login(data: LoginRequest): Promise<AuthResponse> {
+		const response = await api.post("/api/auth/login", data);
+		const { token, user } = response.data;
+		localStorage.setItem("token", token);
+		return { token, user };
+	}
 
-	register: async (data: RegisterRequest): Promise<AuthResponse> => {
-		try {
-			const response = await api.post('/auth/register', data);
-			return response.data;
-		} catch (error) {
-			console.error('Registration error:', error);
-			throw error;
-		}
-	},
+	async register(data: RegisterRequest): Promise<AuthResponse> {
+		const response = await api.post("/api/auth/register", {
+			username: data.name.toLowerCase().replace(/\s+/g, '_'),
+			email: data.email,
+			password: data.password,
+			full_name: data.name
+		});
+		const { token, user } = response.data;
+		localStorage.setItem("token", token);
+		return { token, user };
+	}
 
-	logout: () => {
-		localStorage.removeItem('token');
-	},
+	async logout(): Promise<void> {
+		localStorage.removeItem("token");
+		await api.post("/api/auth/logout");
+	}
 
 	// File operations
-	uploadFile: async (file: File): Promise<FileUploadResponse> => {
+	async uploadFile(file: File): Promise<FileUploadResponse> {
 		const formData = new FormData();
-		formData.append('file', file);
-		const response = await api.post('/upload', formData, {
+		formData.append("file", file);
+		const response = await api.post("/api/files/upload", formData, {
 			headers: {
-				'Content-Type': 'multipart/form-data',
+				"Content-Type": "multipart/form-data",
 			},
 		});
 		return response.data;
-	},
+	}
 
-	listFiles: async (params: {
-		page?: number;
-		page_size?: number;
-		status?: string;
-		search?: string;
-	}): Promise<FileListResponse> => {
-		const response = await api.get('/files', { params });
+	async getFiles(): Promise<FileListResponse> {
+		const response = await api.get("/api/files");
 		return response.data;
-	},
+	}
 
-	deleteFile: async (fileId: number): Promise<void> => {
-		await api.delete(`/files/${fileId}`);
-	},
+	async deleteFile(fileId: string): Promise<void> {
+		await api.delete(`/api/files/${fileId}`);
+	}
 
 	// Analysis operations
-	getAnalysisStatus: async (fileId: number): Promise<AnalysisResponse> => {
-		const response = await api.get(`/analysis/${fileId}`);
+	async startAnalysis(fileId: string, type: string): Promise<AnalysisResponse> {
+		const response = await api.post("/api/analysis", {
+			file_id: fileId,
+			type,
+		});
 		return response.data;
-	},
+	}
 
-	reanalyzeFile: async (fileId: number): Promise<AnalysisResponse> => {
-		const response = await api.post(`/files/${fileId}/reanalyze`);
+	async getAnalysis(analysisId: string): Promise<AnalysisResponse> {
+		const response = await api.get(`/api/analysis/${analysisId}`);
 		return response.data;
-	},
+	}
 
-	// Network analysis
-	getNetworkAnalysis: async (fileId: number): Promise<any> => {
-		const response = await api.get(`/network-analysis/${fileId}`);
+	async getAnalysisResults(analysisId: string): Promise<any> {
+		const response = await api.get(`/api/analysis/${analysisId}/results`);
 		return response.data;
-	},
+	}
 
-	// Memory analysis
-	getMemoryAnalysis: async (fileId: number): Promise<any> => {
-		const response = await api.get(`/memory-analysis/${fileId}`);
+	// Generic HTTP methods
+	async get<T>(url: string): Promise<T> {
+		const response = await api.get(url);
 		return response.data;
-	},
+	}
 
-	// File analysis
-	getFileAnalysis: async (fileId: number): Promise<any> => {
-		const response = await api.get(`/file-analysis/${fileId}`);
+	async post<T>(url: string, data?: any): Promise<T> {
+		const response = await api.post(url, data);
 		return response.data;
-	},
+	}
 
-	// WebSocket connection
-	connectWebSocket: (analysisId: number, token: string): WebSocket => {
-		const wsUrl = `${API_BASE_URL.replace(
-			'http',
-			'ws'
-		)}/network/ws/${analysisId}?token=${token}`;
-		return new WebSocket(wsUrl);
-	},
+	async put<T>(url: string, data?: any): Promise<T> {
+		const response = await api.put(url, data);
+		return response.data;
+	}
 
-	// Add a more general WebSocket connection function for other channels
-	connectRealtimeWebSocket: (
-		channel: string,
-		token: string,
-		sessionId?: string
-	): WebSocket => {
-		const wsUrl = `${API_BASE_URL.replace(
-			'http',
-			'ws'
-		)}/realtime/ws/${channel}?token=${token}${
-			sessionId ? `&session_id=${sessionId}` : ''
-		}`;
-		return new WebSocket(wsUrl);
-	},
+	async delete<T>(url: string): Promise<T> {
+		const response = await api.delete(url);
+		return response.data;
+	}
 
-	// OAuth methods
-	getGithubAuthUrl: async (): Promise<string> => {
-		const response = await api.get('/auth/github/login');
+	async verifyToken() {
+		const response = await api.get("/auth/verify");
+		return response.data;
+	}
+
+	async getGoogleAuthUrl(): Promise<string> {
+		const response = await api.get("/api/auth/google/login");
 		return response.data.authorize_url;
-	},
-	
-	getGoogleAuthUrl: async (): Promise<string> => {
-		const response = await api.get('/auth/google/login');
+	}
+
+	async getGithubAuthUrl(): Promise<string> {
+		const response = await api.get("/api/auth/github/login");
 		return response.data.authorize_url;
-	},
-	
-	// Process OAuth tokens from URL
-	processOAuthRedirect: (urlParams: URLSearchParams): string | null => {
-		const token = urlParams.get('token');
-		if (token) {
-			localStorage.setItem('token', token);
-			return token;
-		}
-		return null;
-	},
-};
+	}
+}
+
+export const apiService = new ApiService();
