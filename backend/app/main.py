@@ -32,6 +32,7 @@ from api import realtime
 from services.status_service import status_service
 import redis.asyncio as redis
 from redis.exceptions import ConnectionError
+from api.auth_routes import router as auth_router
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -149,6 +150,9 @@ app.status_service = status_service
 
 # Include realtime router
 app.include_router(realtime.router)
+
+# Add auth routes
+app.include_router(auth_router)
 
 # Root endpoint
 @app.get("/")
