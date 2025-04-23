@@ -1,0 +1,1 @@
+/mnt/c/Users/Lamelo/Desktop/Programming_life/mini-forensic/backend/.venv/bin/python: No module named uvicorn

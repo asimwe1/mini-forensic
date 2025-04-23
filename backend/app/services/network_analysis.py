@@ -3,10 +3,19 @@ import json
 import logging
 import subprocess
 from celery import Celery
-from typing import Dict, List
-from core.db import SessionLocal
-from models import NetworkAnalysis
+from typing import Dict, List, Optional
+from app.core.db import SessionLocal
+from app.models import NetworkAnalysis, File
 from scapy.all import rdpcap  # Kept for potential custom use cases
+from fastapi import WebSocket
+from sqlalchemy.orm import Session
+from app.core.enums import AnalysisStatus
+import asyncio
+from datetime import datetime
+from app.core.websocket import websocket_manager
+from app.services.status_service import status_service
+from app.core.exceptions import AnalysisError
+from app.core.config import settings
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -130,6 +139,154 @@ def analyze_with_scapy(pcap_file: str) -> List[str]:
     except Exception as e:
         logger.error(f"Scapy analysis failed: {str(e)}")
         raise
+
+class NetworkAnalysisService:
+    def __init__(self):
+        self.status_service = status_service
+
+    async def analyze_network_task(self, file_id: int, db: Session) -> Dict:
+        """Analyze network traffic from PCAP file."""
+        try:
+            # Create analysis record
+            analysis = NetworkAnalysis(
+                file_id=file_id,
+                status=AnalysisStatus.PENDING,
+                started_at=datetime.utcnow()
+            )
+            db.add(analysis)
+            db.commit()
+            db.refresh(analysis)
+
+            # Simulate analysis process
+            await self.status_service.update_status(analysis.id, AnalysisStatus.RUNNING)
+            
+            # Mock data for demonstration
+            result = {
+                "connections": [
+                    {
+                        "id": 1,
+                        "source_ip": "192.168.1.100",
+                        "dest_ip": "8.8.8.8",
+                        "protocol": "TCP",
+                        "source_port": 54321,
+                        "dest_port": 443,
+                        "status": "established",
+                        "bytes_sent": 1024 * 100,
+                        "bytes_received": 1024 * 200
+                    },
+                    {
+                        "id": 2,
+                        "source_ip": "192.168.1.100",
+                        "dest_ip": "1.1.1.1",
+                        "protocol": "UDP",
+                        "source_port": 123,
+                        "dest_port": 53,
+                        "status": "completed",
+                        "bytes_sent": 512,
+                        "bytes_received": 1024
+                    }
+                ],
+                "statistics": {
+                    "total_packets": 1000,
+                    "total_bytes": 1024 * 1024 * 10,  # 10MB
+                    "protocols": {
+                        "TCP": 800,
+                        "UDP": 200
+                    }
+                }
+            }
+
+            # Update analysis with results
+            analysis.result = result
+            analysis.status = AnalysisStatus.COMPLETED
+            analysis.completed_at = datetime.utcnow()
+            db.commit()
+
+            return result
+
+        except Exception as e:
+            logger.error(f"Network analysis failed: {str(e)}")
+            if analysis:
+                analysis.status = AnalysisStatus.FAILED
+                analysis.error_message = str(e)
+                db.commit()
+            raise AnalysisError(f"Network analysis failed: {str(e)}")
+
+    async def stream_network_data(self, analysis_id: int, websocket: WebSocket):
+        """Stream real-time network analysis data."""
+        try:
+            await websocket.accept()
+            
+            # Send initial data
+            await websocket.send_json({
+                "type": "initial_data",
+                "data": {
+                    "connections": [
+                        {
+                            "id": 1,
+                            "source_ip": "192.168.1.100",
+                            "dest_ip": "8.8.8.8",
+                            "protocol": "TCP",
+                            "source_port": 54321,
+                            "dest_port": 443,
+                            "status": "established",
+                            "bytes_sent": 1024 * 100,
+                            "bytes_received": 1024 * 200
+                        }
+                    ]
+                }
+            })
+
+            # Simulate real-time updates
+            while True:
+                await asyncio.sleep(5)
+                await websocket.send_json({
+                    "type": "update",
+                    "data": {
+                        "connection_updates": [
+                            {
+                                "id": 1,
+                                "bytes_sent": 1024 * 150,  # Updated bytes sent
+                                "bytes_received": 1024 * 250  # Updated bytes received
+                            }
+                        ]
+                    }
+                })
+
+        except Exception as e:
+            logger.error(f"Error streaming network data: {str(e)}")
+            await websocket.close()
+
+    async def get_network_analysis(self, file_id: int, db: Session) -> Optional[Dict]:
+        """Get the latest network analysis for a file."""
+        analysis = db.query(NetworkAnalysis).filter(
+            NetworkAnalysis.file_id == file_id
+        ).order_by(NetworkAnalysis.created_at.desc()).first()
+        
+        if not analysis:
+            return None
+            
+        return {
+            "id": analysis.id,
+            "file_id": analysis.file_id,
+            "status": analysis.status,
+            "result": analysis.result,
+            "error_message": analysis.error_message,
+            "started_at": analysis.started_at,
+            "completed_at": analysis.completed_at
+        }
+
+    async def get_network_statistics(self, file_id: int, db: Session) -> Dict:
+        """Get network analysis statistics."""
+        analysis = await self.get_network_analysis(file_id, db)
+        if not analysis or not analysis["result"]:
+            return {
+                "total_packets": 0,
+                "total_bytes": 0,
+                "protocols": {}
+            }
+            
+        return analysis["result"]["statistics"]
 
 if __name__ == "__main__":
     pcap_file = "upload.pcap"

@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 from typing import Any, Dict, Optional, Union
 from enum import Enum
-from core.enums import ErrorCode
+from app.core.enums import ErrorCode
 
 class ErrorCode(str, Enum):
     """Standardized error codes for the application."""
@@ -112,4 +112,9 @@ class WebSocketAuthError(Exception):
     """Raised when WebSocket authentication fails."""
     def __init__(self, message: str = "WebSocket authentication failed"):
         self.message = message
-        super().__init__(self.message) 
+        super().__init__(self.message)
+
+class AnalysisError(Exception):
+    """Custom exception for analysis errors."""
+    def __init__(self, message: str):
+        super().__init__(message) 

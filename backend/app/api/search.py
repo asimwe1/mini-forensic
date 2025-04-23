@@ -3,11 +3,11 @@ from fastapi import APIRouter, Depends, Query, HTTPException
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from elasticsearch import AsyncElasticsearch
-from core.config import settings
-from schemas.search import SearchRequest, SearchResponse, SearchResult
-from core.auth import get_current_user, TokenData
-from core.db import get_db
-from services.search import SearchService
+from app.core.config import settings
+from app.schemas.search import SearchRequest, SearchResponse, SearchResult
+from app.core.auth import get_current_user, TokenData
+from app.core.db import get_db
+from app.services.search import SearchService
 
 router = APIRouter(prefix="/api/v1/search", tags=["search"])
 

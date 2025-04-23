@@ -2,7 +2,7 @@ from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from typing import Dict, Any
 import traceback
-from core.exceptions import BaseAPIException
+from app.core.exceptions import BaseAPIException
 
 async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Global exception handler for all endpoints."""

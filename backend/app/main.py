@@ -3,14 +3,14 @@ from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import AsyncGenerator, List, Optional
-from core.db import get_db, init_db
-from core.config import settings, EnvironmentType
-from api.endpoint import router as api_router
-from services.memory_analysis import app_celery  # Celery instance shared across services
-from models import File, User, Report, Task  # Assuming updated models
+from app.core.db import get_db, init_db
+from app.core.config import settings, EnvironmentType
+from app.api.endpoint import router as api_router
+from app.services.memory_analysis import app_celery  # Celery instance shared across services
+from app.models import File, User, Report, Task  # Assuming updated models
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
-from core.db import get_db, init_db
+from app.core.db import get_db, init_db
 from fastapi.responses import JSONResponse
 from fastapi_limiter import FastAPILimiter
 from fastapi_limiter.depends import RateLimiter
@@ -19,20 +19,20 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 import time
-from core.auth import get_current_user, TokenData, create_access_token
-from core.exceptions import FileAnalysisError, ReportGenerationError
+from app.core.auth import get_current_user, TokenData, create_access_token
+from app.core.exceptions import FileAnalysisError, ReportGenerationError
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-from core.logging_config import setup_logging
-from api.filesystem import router as filesystem_router
-from api import visualization, search
-from core.websocket import websocket_manager
-from core.error_handler import global_exception_handler
-from api import realtime
-from services.status_service import status_service
+from app.core.logging_config import setup_logging
+from app.api.filesystem import router as filesystem_router
+from app.api import visualization, search
+from app.core.websocket import websocket_manager
+from app.core.error_handler import global_exception_handler
+from app.api import realtime
+from app.services.status_service import status_service
 import redis.asyncio as redis
 from redis.exceptions import ConnectionError
-from api.auth_routes import router as auth_router
+from app.api.auth_routes import router as auth_router
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)

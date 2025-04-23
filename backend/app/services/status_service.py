@@ -1,7 +1,7 @@
 from typing import Dict, Any, Optional
 import asyncio
 from datetime import datetime
-from core.websocket_manager import websocket_manager
+from app.core.websocket import websocket_manager
 
 class StatusService:
     def __init__(self):

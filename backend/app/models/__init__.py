@@ -1,16 +1,16 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Enum, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from .base import Base
-from .file import File
-from .log import Log
-from .analysis import AnalysisTask
-from .memory_analysis import MemoryAnalysis
-from .network_analysis import NetworkAnalysis
-from .file_analysis import FileAnalysis
-from .report import Report
-from .task import Task
-from .user import User
+from app.models.base import Base
+from app.models.file import File
+from app.models.log import Log
+from app.models.analysis import AnalysisTask
+from app.models.memory_analysis import MemoryAnalysis
+from app.models.network_analysis import NetworkAnalysis
+from app.models.file_analysis import FileAnalysis
+from app.models.report import Report
+from app.models.task import Task
+from app.models.user import User    
 
 __all__ = [
     "Base",

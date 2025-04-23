@@ -1,14 +1,14 @@
 import logging
 import json
-from fastapi import APIRouter, UploadFile, File as FastAPIFile, Depends, HTTPException, Request
+from fastapi import APIRouter, UploadFile, File as FastAPIFile, Depends, HTTPException, Request, WebSocket, BackgroundTasks
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from core.db import get_db
-from core.config import settings
-from models import File, FileAnalysis, MemoryAnalysis, NetworkAnalysis, Report, Task, AnalysisTask
-from services.memory_analysis import analyze_memory_task
-from services.network_analysis import analyze_network_task
-from services.file_analysis import analyze_file, analyze_directory_task
+from app.core.db import get_db
+from app.core.config import settings
+from app.models import File, FileAnalysis, MemoryAnalysis, NetworkAnalysis, Report, Task, AnalysisTask
+from app.services.memory_analysis import analyze_memory_task
+from app.services.network_analysis import analyze_network_task
+from app.services.file_analysis import analyze_file, analyze_directory_task
 import cloudinary.uploader
 import magic
 from pydantic import BaseModel, Field
@@ -18,15 +18,17 @@ from fastapi_limiter import FastAPILimiter
 from fastapi_limiter.depends import RateLimiter
 import aiohttp
 import asyncio
-from core.auth import get_current_user, TokenData, sanitize_filename
-from core.enums import AnalysisStatus, FileType
-from core.exceptions import (
+from app.core.auth import get_current_user, TokenData, sanitize_filename
+from app.core.enums import AnalysisStatus, FileType
+from app.core.exceptions import (
     FileValidationError,
     RateLimitExceeded,
     CloudinaryError,
     FileAnalysisError,
     BaseAPIException
 )
+from app.core.websocket import websocket_manager
+from app.services.status_service import status_service
 
 logger = logging.getLogger(__name__)
 
@@ -431,3 +433,135 @@ async def reanalyze_file(
         db.rollback()
         logger.error(f"Failed to start reanalysis: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to start reanalysis")
+
+# Add new endpoints for file analysis
+@router.get("/files/{file_id}/reanalyze", response_model=AnalysisResponse)
+async def reanalyze_file(
+    file_id: int,
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Reanalyze a file that has already been uploaded."""
+    try:
+        file = db.query(File).filter(File.id == file_id).first()
+        if not file:
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        if file.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Not authorized to access this file")
+        
+        # Create new analysis task
+        task = AnalysisTask(
+            file_id=file_id,
+            task_type=file.file_type,
+            status=AnalysisStatus.PENDING,
+            created_at=datetime.utcnow()
+        )
+        db.add(task)
+        db.commit()
+        
+        # Trigger analysis based on file type
+        if file.file_type in ["application/vnd.tcpdump.pcap", "application/x-pcapng"]:
+            await analyze_network_task.delay(file_id)
+        elif file.file_type == "application/octet-stream":
+            await analyze_memory_task.delay(file_id)
+        else:
+            await analyze_file.delay(file_id)
+        
+        return AnalysisResponse(
+            status="success",
+            message="File reanalysis started",
+            file_id=file_id,
+            analysis_status=AnalysisStatus.PENDING,
+            analysis_results=None,
+            progress=0,
+            task_id=str(task.id)
+        )
+    except Exception as e:
+        logger.error(f"Failed to reanalyze file: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to start file reanalysis")
+
+# Add endpoint for file deletion
+@router.delete("/files/{file_id}")
+async def delete_file(
+    file_id: int,
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a file and its associated analyses."""
+    try:
+        file = db.query(File).filter(File.id == file_id).first()
+        if not file:
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        if file.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Not authorized to delete this file")
+        
+        # Delete associated analyses
+        db.query(FileAnalysis).filter(FileAnalysis.file_id == file_id).delete()
+        db.query(NetworkAnalysis).filter(NetworkAnalysis.file_id == file_id).delete()
+        db.query(MemoryAnalysis).filter(MemoryAnalysis.file_id == file_id).delete()
+        
+        # Delete file record
+        db.delete(file)
+        db.commit()
+        
+        return {"message": "File deleted successfully"}
+    except Exception as e:
+        logger.error(f"Failed to delete file: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete file")
+
+# Add endpoint for file search
+@router.get("/files/search")
+async def search_files(
+    query: str,
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Search files by filename or metadata."""
+    try:
+        files = db.query(File).filter(
+            File.user_id == current_user.id,
+            File.filename.ilike(f"%{query}%")
+        ).all()
+        
+        return [
+            {
+                "id": f.id,
+                "filename": f.filename,
+                "file_type": f.file_type,
+                "size": f.file_size,
+                "analysis_status": f.analysis_status,
+                "upload_date": f.upload_date.isoformat()
+            }
+            for f in files
+        ]
+    except Exception as e:
+        logger.error(f"Failed to search files: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to search files")
+
+# Add endpoint for analysis progress
+@router.get("/analysis/{task_id}/progress")
+async def get_analysis_progress(
+    task_id: str,
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get the progress of an analysis task."""
+    try:
+        task = db.query(AnalysisTask).filter(AnalysisTask.id == task_id).first()
+        if not task:
+            raise HTTPException(status_code=404, detail="Task not found")
+        
+        if task.file.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Not authorized to access this task")
+        
+        return {
+            "task_id": task.id,
+            "status": task.status,
+            "progress": task.progress,
+            "result": task.result if task.result else None
+        }
+    except Exception as e:
+        logger.error(f"Failed to get analysis progress: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get analysis progress")

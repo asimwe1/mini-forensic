@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
-from core.db import get_db
-from core.auth import get_current_user, TokenData
-from services.visualization import VisualizationService
-from schemas.visualization import (
+from app.core.db import get_db
+from app.core.auth import get_current_user, TokenData
+from app.services.visualization import VisualizationService
+from app.schemas.visualization import (
     GraphVisualizationResponse,
     TimeSeriesDataResponse,
     SearchResult

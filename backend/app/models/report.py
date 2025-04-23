@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, JSON, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .base import Base
-from core.enums import AnalysisStatus
+from app.core.enums import AnalysisStatus
 
 class Report(Base):
     __tablename__ = "reports"

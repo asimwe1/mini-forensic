@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime, timedelta
-from core.db import get_db
-from core.auth import create_access_token, verify_password, get_password_hash
-from models.user import User
-from core.config import settings
+from app.core.db import get_db
+from app.core.auth import create_access_token, verify_password, get_password_hash
+from app.models.user import User
+from app.core.config import settings
 import requests
 import json
 
