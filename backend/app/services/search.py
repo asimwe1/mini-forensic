@@ -3,8 +3,8 @@ from typing import Dict, List, Optional
 from datetime import datetime
 from sqlalchemy.orm import Session
 from elasticsearch import AsyncElasticsearch
-from core.config import settings
-from schemas.search import SearchRequest, SearchResponse, SearchResult
+from app.core.config import settings
+from app.schemas.search import SearchRequest, SearchResponse, SearchResult
 
 logger = logging.getLogger(__name__)
 

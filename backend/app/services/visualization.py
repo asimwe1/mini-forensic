@@ -1,8 +1,8 @@
 import logging
 from typing import Dict, List, Optional
 from sqlalchemy.orm import Session
-from models import File, NetworkAnalysis, MemoryAnalysis
-from core.enums import AnalysisStatus
+from app.models import File, NetworkAnalysis, MemoryAnalysis
+from app.core.enums import AnalysisStatus
 
 logger = logging.getLogger(__name__)
 

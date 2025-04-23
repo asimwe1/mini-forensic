@@ -7,12 +7,12 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
-from core.config import settings
+from app.core.config import settings
 from sqlalchemy.orm import Session
-from models.user import User, Permission
-from core.exceptions import BaseAPIException
-from core.enums import ErrorCode
-from core.db import get_db
+from app.models.user import User, Permission
+from app.core.exceptions import BaseAPIException
+from app.core.enums import ErrorCode
+from app.core.db import get_db
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

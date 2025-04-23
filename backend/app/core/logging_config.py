@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
 from pythonjsonlogger import jsonlogger
-from core.config import settings
+from app.core.config import settings
 
 class CustomJsonFormatter(jsonlogger.JsonFormatter):
     """Custom JSON formatter for structured logging."""

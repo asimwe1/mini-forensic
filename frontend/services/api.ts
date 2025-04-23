@@ -20,7 +20,7 @@ api.interceptors.request.use(
 		}
 		return config;
 	},
-	/// @ts-ignore 
+	/// @ts-ignore
 	(error: any) => {
 		return Promise.reject(error);
 	}
@@ -28,7 +28,6 @@ api.interceptors.request.use(
 
 // Response interceptor for handling errors
 api.interceptors.response.use(
-
 	(response) => response,
 	(error) => {
 		const message = error.response?.data?.detail || 'An error occurred';
@@ -97,6 +96,93 @@ export interface AuthResponse {
 	};
 }
 
+export interface NetworkAnalysisResponse {
+	id: number;
+	file_id: number;
+	status: string;
+	result: {
+		connections: Array<{
+			id: string;
+			source: string;
+			destination: string;
+			protocol: string;
+			port: number;
+			status: string;
+			timestamp: string;
+			bytes: number;
+		}>;
+		statistics: {
+			total_packets: number;
+			total_bytes: number;
+			protocols: Record<string, number>;
+		};
+	};
+	started_at: string;
+	completed_at: string;
+	error_message?: string;
+}
+
+export interface MemoryAnalysisResponse {
+	id: number;
+	file_id: number;
+	status: string;
+	result: {
+		processes: Array<{
+			pid: number;
+			name: string;
+			memory_usage: number;
+			threads: number;
+			status: string;
+		}>;
+		memory_regions: Array<{
+			address: string;
+			size: number;
+			type: string;
+			permissions: string;
+			description: string;
+		}>;
+		statistics: {
+			total_memory: number;
+			used_memory: number;
+			process_count: number;
+		};
+	};
+	started_at: string;
+	completed_at: string;
+	error_message?: string;
+}
+
+export interface FileAnalysisResponse {
+	id: number;
+	file_id: number;
+	status: string;
+	result: {
+		file_info: {
+			name: string;
+			size: number;
+			type: string;
+			created_at: string;
+			modified_at: string;
+		};
+		metadata: {
+			mime_type: string;
+			hash: string;
+			permissions: string;
+			owner: string;
+			group: string;
+		};
+		content_analysis: {
+			text_content: string;
+			entropy: number;
+			is_encrypted: boolean;
+			is_compressed: boolean;
+		};
+	};
+	started_at: string;
+	completed_at: string;
+	error_message?: string;
+}
+
 export const apiService = {
 	// Authentication methods
 	login: async (data: LoginRequest): Promise<AuthResponse> => {
@@ -153,6 +239,11 @@ export const apiService = {
 		await api.delete(`/files/${fileId}`);
 	},
 
+	searchFiles: async (query: string): Promise<FileUploadResponse[]> => {
+		const response = await api.get('/files/search', { params: { query } });
+		return response.data;
+	},
+
 	// Analysis operations
 	getAnalysisStatus: async (fileId: number): Promise<AnalysisResponse> => {
 		const response = await api.get(`/analysis/${fileId}`);
@@ -164,26 +255,78 @@ export const apiService = {
 		return response.data;
 	},
 
+	getAnalysisProgress: async (
+		taskId: string
+	): Promise<{
+		task_id: string;
+		status: string;
+		progress: number;
+		result: any;
+	}> => {
+		const response = await api.get(`/analysis/${taskId}/progress`);
+		return response.data;
+	},
+
 	// Network analysis
-	getNetworkAnalysis: async (fileId: number): Promise<any> => {
+	getNetworkAnalysis: async (
+		fileId: number
+	): Promise<NetworkAnalysisResponse> => {
 		const response = await api.get(`/network-analysis/${fileId}`);
 		return response.data;
 	},
 
+	getNetworkStatistics: async (
+		fileId: number
+	): Promise<{
+		total_packets: number;
+		total_bytes: number;
+		protocols: Record<string, number>;
+	}> => {
+		const response = await api.get(`/network-analysis/${fileId}/statistics`);
+		return response.data;
+	},
+
 	// Memory analysis
-	getMemoryAnalysis: async (fileId: number): Promise<any> => {
+	getMemoryAnalysis: async (
+		fileId: number
+	): Promise<MemoryAnalysisResponse> => {
 		const response = await api.get(`/memory-analysis/${fileId}`);
 		return response.data;
 	},
 
+	getMemoryStatistics: async (
+		fileId: number
+	): Promise<{
+		total_memory: number;
+		used_memory: number;
+		process_count: number;
+	}> => {
+		const response = await api.get(`/memory-analysis/${fileId}/statistics`);
+		return response.data;
+	},
+
 	// File analysis
-	getFileAnalysis: async (fileId: number): Promise<any> => {
+	getFileAnalysis: async (fileId: number): Promise<FileAnalysisResponse> => {
 		const response = await api.get(`/file-analysis/${fileId}`);
 		return response.data;
 	},
 
-	// WebSocket connection
-	connectWebSocket: (analysisId: number, token: string): WebSocket => {
+	getFileStatistics: async (
+		fileId: number
+	): Promise<{
+		total_files: number;
+		total_size: number;
+		file_types: Record<string, number>;
+	}> => {
+		const response = await api.get(`/file-analysis/${fileId}/statistics`);
+		return response.data;
+	},
+
+	// WebSocket connections
+	connectNetworkWebSocket: (analysisId: number): WebSocket => {
+		const token = localStorage.getItem('token');
+		if (!token) throw new Error('No authentication token found');
+
 		const wsUrl = `${API_BASE_URL.replace(
 			'http',
 			'ws'
@@ -191,18 +334,25 @@ export const apiService = {
 		return new WebSocket(wsUrl);
 	},
 
-	// Add a more general WebSocket connection function for other channels
-	connectRealtimeWebSocket: (
-		channel: string,
-		token: string,
-		sessionId?: string
-	): WebSocket => {
+	connectMemoryWebSocket: (analysisId: number): WebSocket => {
+		const token = localStorage.getItem('token');
+		if (!token) throw new Error('No authentication token found');
+
 		const wsUrl = `${API_BASE_URL.replace(
 			'http',
 			'ws'
-		)}/realtime/ws/${channel}?token=${token}${
-			sessionId ? `&session_id=${sessionId}` : ''
-		}`;
+		)}/memory/ws/${analysisId}?token=${token}`;
+		return new WebSocket(wsUrl);
+	},
+
+	connectFileWebSocket: (analysisId: number): WebSocket => {
+		const token = localStorage.getItem('token');
+		if (!token) throw new Error('No authentication token found');
+
+		const wsUrl = `${API_BASE_URL.replace(
+			'http',
+			'ws'
+		)}/file/ws/${analysisId}?token=${token}`;
 		return new WebSocket(wsUrl);
 	},
 
@@ -211,12 +361,12 @@ export const apiService = {
 		const response = await api.get('/auth/github/login');
 		return response.data.authorize_url;
 	},
-	
+
 	getGoogleAuthUrl: async (): Promise<string> => {
 		const response = await api.get('/auth/google/login');
 		return response.data.authorize_url;
 	},
-	
+
 	// Process OAuth tokens from URL
 	processOAuthRedirect: (urlParams: URLSearchParams): string | null => {
 		const token = urlParams.get('token');

@@ -1,16 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from core.db import get_db
-from core.auth import get_current_user, TokenData
-from models.filesystem import Directory, FileMetadata
-from schemas.filesystem import (
+from app.core.db import get_db
+from app.core.auth import get_current_user, TokenData
+from app.models.filesystem import Directory, FileMetadata
+from app.schemas.filesystem import (
     DirectoryResponse,
     FileSystemNode,
     FileMetadataResponse,
     CreateDirectoryRequest
 )
-from core.websocket import websocket_manager
+from app.core.websocket import websocket_manager
 import math
 
 router = APIRouter(prefix="/api/v1/filesystem", tags=["filesystem"])

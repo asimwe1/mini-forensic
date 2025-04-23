@@ -9,15 +9,21 @@ import asyncio
 import aiohttp
 import tempfile
 import shutil
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from celery import Celery, Task, shared_task
 from datetime import datetime
-from core.db import SessionLocal
-from models import File, FileAnalysis, AnalysisTask
+from app.core.db import SessionLocal
+from app.models import File, FileAnalysis, AnalysisTask
 from concurrent.futures import ThreadPoolExecutor
-from fastapi import HTTPException
-from core.enums import AnalysisStatus, FileType
-from core.exceptions import FileAnalysisError
+from fastapi import HTTPException, WebSocket
+from app.core.enums import AnalysisStatus, FileType
+from app.core.exceptions import FileAnalysisError
+from sqlalchemy.orm import Session
+from app.models import FileAnalysis
+from app.core.websocket import websocket_manager
+from app.services.status_service import status_service
+from app.core.exceptions import AnalysisError
+from app.core.config import settings
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -283,6 +289,223 @@ async def update_analysis_status(
                 logger.error(f"No analysis task found for file {file_id}")
     except Exception as e:
         logger.error(f"Failed to update analysis status: {str(e)}")
+
+class FileAnalysisService:
+    def __init__(self, db: Session):
+        self.db = db
+        self.mime = magic.Magic(mime=True)
+        self.status_service = status_service
+
+    async def analyze_file_task(self, file_id: int) -> Dict:
+        """Analyze a file for forensic information."""
+        try:
+            # Create analysis record
+            analysis = FileAnalysis(
+                file_id=file_id,
+                status=AnalysisStatus.PENDING,
+                started_at=datetime.utcnow()
+            )
+            self.db.add(analysis)
+            self.db.commit()
+            self.db.refresh(analysis)
+
+            # Simulate analysis process
+            await self.status_service.update_status(analysis.id, AnalysisStatus.RUNNING)
+            
+            # Mock data for demonstration
+            result = {
+                "file_info": {
+                    "name": "example.exe",
+                    "size": 1024 * 1024,  # 1MB
+                    "type": "executable",
+                    "created_at": datetime.utcnow().isoformat(),
+                    "modified_at": datetime.utcnow().isoformat(),
+                    "accessed_at": datetime.utcnow().isoformat()
+                },
+                "metadata": {
+                    "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                    "entropy": 7.5
+                },
+                "content_analysis": {
+                    "strings": [
+                        "Hello World",
+                        "Welcome to the program",
+                        "Version 1.0.0"
+                    ],
+                    "file_type": "PE32 executable",
+                    "sections": [
+                        {
+                            "name": ".text",
+                            "size": 1024 * 100,
+                            "entropy": 6.8
+                        },
+                        {
+                            "name": ".data",
+                            "size": 1024 * 50,
+                            "entropy": 4.2
+                        }
+                    ]
+                }
+            }
+
+            # Update analysis with results
+            analysis.result = result
+            analysis.status = AnalysisStatus.COMPLETED
+            analysis.completed_at = datetime.utcnow()
+            self.db.commit()
+
+            return result
+
+        except Exception as e:
+            logger.error(f"File analysis failed: {str(e)}")
+            if analysis:
+                analysis.status = AnalysisStatus.FAILED
+                analysis.error_message = str(e)
+                self.db.commit()
+            raise AnalysisError(f"File analysis failed: {str(e)}")
+
+    async def analyze_directory_task(self, directory_path: str, file_id: Optional[int] = None) -> Dict:
+        """Analyze a directory for forensic information."""
+        try:
+            # Create analysis record
+            analysis = FileAnalysis(
+                file_id=file_id,
+                status=AnalysisStatus.PENDING,
+                started_at=datetime.utcnow()
+            )
+            self.db.add(analysis)
+            self.db.commit()
+            self.db.refresh(analysis)
+
+            # Simulate analysis process
+            await self.status_service.update_status(analysis.id, AnalysisStatus.RUNNING)
+            
+            # Mock data for demonstration
+            result = {
+                "directory_info": {
+                    "name": "Documents",
+                    "path": directory_path,
+                    "total_size": 1024 * 1024 * 100,  # 100MB
+                    "file_count": 50,
+                    "directory_count": 5
+                },
+                "files": [
+                    {
+                        "name": "document1.pdf",
+                        "size": 1024 * 100,
+                        "type": "PDF",
+                        "created_at": datetime.utcnow().isoformat(),
+                        "modified_at": datetime.utcnow().isoformat()
+                    },
+                    {
+                        "name": "image1.jpg",
+                        "size": 1024 * 500,
+                        "type": "JPEG",
+                        "created_at": datetime.utcnow().isoformat(),
+                        "modified_at": datetime.utcnow().isoformat()
+                    }
+                ]
+            }
+
+            # Update analysis with results
+            analysis.result = result
+            analysis.status = AnalysisStatus.COMPLETED
+            analysis.completed_at = datetime.utcnow()
+            self.db.commit()
+
+            return result
+
+        except Exception as e:
+            logger.error(f"Directory analysis failed: {str(e)}")
+            if analysis:
+                analysis.status = AnalysisStatus.FAILED
+                analysis.error_message = str(e)
+                self.db.commit()
+            raise AnalysisError(f"Directory analysis failed: {str(e)}")
+
+    async def stream_file_data(self, analysis_id: int, websocket: WebSocket):
+        """Stream real-time file analysis data."""
+        try:
+            await websocket.accept()
+            
+            # Send initial data
+            await websocket.send_json({
+                "type": "initial_data",
+                "data": {
+                    "file_info": {
+                        "name": "example.exe",
+                        "size": 1024 * 1024,
+                        "type": "executable"
+                    },
+                    "metadata": {
+                        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+                        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                    }
+                }
+            })
+
+            # Simulate real-time updates
+            while True:
+                await asyncio.sleep(5)
+                await websocket.send_json({
+                    "type": "update",
+                    "data": {
+                        "analysis_progress": {
+                            "strings_analyzed": 100,
+                            "sections_analyzed": 2,
+                            "entropy_calculated": True
+                        }
+                    }
+                })
+
+        except Exception as e:
+            logger.error(f"Error streaming file data: {str(e)}")
+            await websocket.close()
+
+    async def get_file_analysis(self, file_id: int) -> Optional[Dict]:
+        """Get the latest file analysis for a file."""
+        analysis = self.db.query(FileAnalysis).filter(
+            FileAnalysis.file_id == file_id
+        ).order_by(FileAnalysis.created_at.desc()).first()
+        
+        if not analysis:
+            return None
+            
+        return {
+            "id": analysis.id,
+            "file_id": analysis.file_id,
+            "status": analysis.status,
+            "result": analysis.result,
+            "error_message": analysis.error_message,
+            "started_at": analysis.started_at,
+            "completed_at": analysis.completed_at
+        }
+
+    async def get_file_statistics(self, file_id: int) -> Dict:
+        """Get file analysis statistics."""
+        analysis = await self.get_file_analysis(file_id)
+        if not analysis or not analysis["result"]:
+            return {
+                "total_files": 0,
+                "total_size": 0,
+                "file_types": {}
+            }
+            
+        if "directory_info" in analysis["result"]:
+            return {
+                "total_files": analysis["result"]["directory_info"]["file_count"],
+                "total_size": analysis["result"]["directory_info"]["total_size"],
+                "file_types": {}
+            }
+        else:
+            return {
+                "total_files": 1,
+                "total_size": analysis["result"]["file_info"]["size"],
+                "file_types": {
+                    analysis["result"]["file_info"]["type"]: 1
+                }
+            }
 
 # Remove or adjust the main block for testing
 if __name__ == "__main__":

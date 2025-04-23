@@ -1,12 +1,14 @@
 import logging
 from typing import Generator
 from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 import os
 from dotenv import load_dotenv
-from core.base import Base
+from app.core.config import settings
+from app.core.base import Base
 
 # Load environment variables from .env file
 load_dotenv()
@@ -16,9 +18,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Database configuration
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./forensics_lab.db")
+SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
 # For SQLite, enforce single-threaded access unless overridden
-SQLITE_CONNECT_ARGS = {"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+SQLITE_CONNECT_ARGS = {"check_same_thread": False} if "sqlite" in SQLALCHEMY_DATABASE_URL else {}
 
 # Create SQLAlchemy engine with connection pooling and retry logic
 @retry(
@@ -33,14 +35,14 @@ def create_db_engine():
     """Create and return a SQLAlchemy engine with retry logic."""
     try:
         engine = create_engine(
-            DATABASE_URL,
+            SQLALCHEMY_DATABASE_URL,
             connect_args=SQLITE_CONNECT_ARGS,
             pool_size=5,          # Max number of connections in the pool
             max_overflow=10,      # Max additional connections beyond pool_size
             pool_timeout=30,      # Timeout for acquiring a connection
             pool_pre_ping=True    # Check connection health before use
         )
-        logger.info(f"Database engine created for {DATABASE_URL}")
+        logger.info(f"Database engine created for {SQLALCHEMY_DATABASE_URL}")
         return engine
     except SQLAlchemyError as e:
         logger.error(f"Failed to create database engine: {str(e)}")

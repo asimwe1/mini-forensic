@@ -1,7 +1,7 @@
 from fastapi import APIRouter, WebSocket, Depends, HTTPException
 from typing import Optional
-from core.websocket_manager import websocket_manager
-from core.auth import get_current_user
+from app.core.websocket import websocket_manager
+from app.core.auth import get_current_user
 import uuid
 
 router = APIRouter(prefix="/api/v1/realtime", tags=["realtime"])

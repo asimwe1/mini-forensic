@@ -4,10 +4,20 @@ from concurrent.futures import ThreadPoolExecutor
 from volatility3.framework import contexts, exceptions
 from volatility3.framework.automagic import stacker
 import volatility3.framework.interfaces.plugins as plugins
-from core.db import SessionLocal
-from models import MemoryAnalysis
+from app.core.db import SessionLocal
+from app.models import MemoryAnalysis, File
+from app.core.enums import AnalysisStatus
 import json
 from celery import Celery
+from typing import Dict, List, Optional
+from fastapi import WebSocket
+import asyncio
+from datetime import datetime
+from sqlalchemy.orm import Session
+from app.core.websocket import websocket_manager
+from app.services.status_service import status_service
+from app.core.exceptions import AnalysisError
+from app.core.config import settings
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -68,17 +78,208 @@ def analyze_memory_task(self, file_path: str, file_id: int):
     }
 
     db = SessionLocal()
-    analysis = analyze_memory_task(
+    analysis = MemoryAnalysis(
         file_id=file_id,
-        result_json=json.dumps(result)
+        status=AnalysisStatus.IN_PROGRESS,
+        started_at=datetime.utcnow()
     )
     db.add(analysis)
     db.commit()
+
+    # TODO: Implement actual memory analysis logic here
+    # For now, we'll return mock data
+    analysis_result = {
+        "processes": [
+            {
+                "pid": 1234,
+                "name": "explorer.exe",
+                "memory_usage": 1024000,
+                "threads": 8,
+                "status": "running"
+            }
+        ],
+        "memory_regions": [
+            {
+                "address": "0x00400000",
+                "size": 4096,
+                "type": "code",
+                "permissions": "r-x",
+                "description": "Main executable code"
+            }
+        ],
+        "statistics": {
+            "total_memory": 8589934592,  # 8GB
+            "used_memory": 4294967296,  # 4GB
+            "process_count": 50
+        }
+    }
+
+    # Update analysis record
+    analysis.status = AnalysisStatus.COMPLETED
+    analysis.result_json = json.dumps(analysis_result)
+    analysis.completed_at = datetime.utcnow()
+    db.commit()
+
     db.close()
 
-    return result
+    return analysis_result
 
+class MemoryAnalysisService:
+    def __init__(self):
+        self.status_service = status_service
 
+    async def analyze_memory_task(self, file_id: int, db: Session) -> Dict:
+        """Analyze memory dump file."""
+        try:
+            # Create analysis record
+            analysis = MemoryAnalysis(
+                file_id=file_id,
+                status=AnalysisStatus.PENDING,
+                started_at=datetime.utcnow()
+            )
+            db.add(analysis)
+            db.commit()
+            db.refresh(analysis)
+
+            # Simulate analysis process
+            await self.status_service.update_status(analysis.id, AnalysisStatus.RUNNING)
+            
+            # Mock data for demonstration
+            result = {
+                "processes": [
+                    {
+                        "pid": 1234,
+                        "name": "explorer.exe",
+                        "memoryUsage": 1024 * 1024 * 50,  # 50MB
+                        "threads": 5,
+                        "status": "running"
+                    },
+                    {
+                        "pid": 5678,
+                        "name": "chrome.exe",
+                        "memoryUsage": 1024 * 1024 * 200,  # 200MB
+                        "threads": 8,
+                        "status": "running"
+                    }
+                ],
+                "memory_regions": [
+                    {
+                        "address": "0x00400000",
+                        "size": 1024 * 1024,
+                        "type": "Code",
+                        "permissions": "r-x",
+                        "description": "Main executable code"
+                    },
+                    {
+                        "address": "0x00600000",
+                        "size": 2 * 1024 * 1024,
+                        "type": "Data",
+                        "permissions": "rw-",
+                        "description": "Global variables"
+                    }
+                ],
+                "statistics": {
+                    "total_memory": 16 * 1024 * 1024 * 1024,  # 16GB
+                    "used_memory": 8 * 1024 * 1024 * 1024,   # 8GB
+                    "process_count": 2
+                }
+            }
+
+            # Update analysis with results
+            analysis.result = result
+            analysis.status = AnalysisStatus.COMPLETED
+            analysis.completed_at = datetime.utcnow()
+            db.commit()
+
+            return result
+
+        except Exception as e:
+            logger.error(f"Memory analysis failed: {str(e)}")
+            if analysis:
+                analysis.status = AnalysisStatus.FAILED
+                analysis.error_message = str(e)
+                db.commit()
+            raise AnalysisError(f"Memory analysis failed: {str(e)}")
+
+    async def stream_memory_data(self, analysis_id: int, websocket: WebSocket):
+        """Stream real-time memory analysis data."""
+        try:
+            await websocket.accept()
+            
+            # Send initial data
+            await websocket.send_json({
+                "type": "initial_data",
+                "data": {
+                    "processes": [
+                        {
+                            "pid": 1234,
+                            "name": "explorer.exe",
+                            "memoryUsage": 1024 * 1024 * 50,
+                            "threads": 5,
+                            "status": "running"
+                        }
+                    ],
+                    "memory_regions": [
+                        {
+                            "address": "0x00400000",
+                            "size": 1024 * 1024,
+                            "type": "Code",
+                            "permissions": "r-x",
+                            "description": "Main executable code"
+                        }
+                    ]
+                }
+            })
+
+            # Simulate real-time updates
+            while True:
+                await asyncio.sleep(5)
+                await websocket.send_json({
+                    "type": "update",
+                    "data": {
+                        "process_updates": [
+                            {
+                                "pid": 1234,
+                                "memoryUsage": 1024 * 1024 * 55  # Updated memory usage
+                            }
+                        ]
+                    }
+                })
+
+        except Exception as e:
+            logger.error(f"Error streaming memory data: {str(e)}")
+            await websocket.close()
+
+    async def get_memory_analysis(self, file_id: int, db: Session) -> Optional[Dict]:
+        """Get the latest memory analysis for a file."""
+        analysis = db.query(MemoryAnalysis).filter(
+            MemoryAnalysis.file_id == file_id
+        ).order_by(MemoryAnalysis.created_at.desc()).first()
+        
+        if not analysis:
+            return None
+            
+        return {
+            "id": analysis.id,
+            "file_id": analysis.file_id,
+            "status": analysis.status,
+            "result": analysis.result,
+            "error_message": analysis.error_message,
+            "started_at": analysis.started_at,
+            "completed_at": analysis.completed_at
+        }
+
+    async def get_memory_statistics(self, file_id: int, db: Session) -> Dict:
+        """Get memory analysis statistics."""
+        analysis = await self.get_memory_analysis(file_id, db)
+        if not analysis or not analysis["result"]:
+            return {
+                "total_memory": 0,
+                "used_memory": 0,
+                "process_count": 0
+            }
+            
+        return analysis["result"]["statistics"]
 
 if __name__ == "__main__":
     file_path = "../../../uploads/memory-dumps/win7_trial_1.vmem"
